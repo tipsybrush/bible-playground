@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bible Playground</title>
+<meta name="description" content="Retro-style Bible games for teens and young adults. No sign-up, just play.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Chakra+Petch:wght@500;600;700&family=Pixelify+Sans:wght@700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<!-- Added to a phone's home screen, the site opens full screen with no browser bars (the only way on iPhone). -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1B1C3D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bible Play">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+</head>
+<body>
+<header class="hud">
+  <div class="hud-inner">
+    <a class="hud-home" href="#">BIBLE<br>PLAYGROUND</a>
+    <div class="hud-stats" id="hud-stats" aria-live="polite"></div>
+    <button class="hud-sound" id="sound-toggle" type="button" aria-pressed="true" aria-label="Sound and vibration on">🔊</button>
+    <button class="hud-sound hud-fs" id="fs-toggle" type="button" aria-pressed="false" aria-label="Full screen" title="Full screen" hidden>
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path class="fs-in" d="M3 9V3h6M15 3h6v6M21 15v6h-6M9 21H3v-6" fill="none" stroke="currentColor" stroke-width="2.6"/><path class="fs-out" d="M9 3v6H3M21 9h-6V3M15 21v-6h6M3 15h6v6" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>
+    </button>
+    <button class="hud-menu" id="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu">
+      <span class="burger" aria-hidden="true"><i></i><i></i><i></i></span><span class="hud-menu-label">Menu</span>
+    </button>
+  </div>
+  <nav class="site-menu" id="site-menu" aria-label="Menu" hidden>
+    <p class="menu-about">Retro-style Bible games for teens and young adults. No sign-up. Earn coins, climb the ranks and challenge your friends from youth fellowship.</p>
+    <a class="menu-item" href="#leaderboards"><span aria-hidden="true">🏆</span> Hall of Fame</a>
+    <a class="menu-item" href="#shop"><span aria-hidden="true">🪙</span> Coin Shop</a>
+    <button class="menu-item" type="button" id="invite"><span aria-hidden="true">💌</span> Invite a friend</button>
+    <p class="share-note" id="invite-note" aria-live="polite"></p>
+  </nav>
+</header>
+<div class="menu-scrim" id="menu-scrim" hidden></div>
+<div class="wrap">
+
+  <main id="home">
+    <header class="hero">
+      <svg class="cloud c1" viewBox="0 0 24 10" shape-rendering="crispEdges" aria-hidden="true"><path fill="var(--edge)" d="M6 2h4V0h6v2h2v2h4v2h2v4H0V6h2V4h4z"/><path fill="var(--cloud)" d="M7 3h4V1h4v2h2v2h4v2h2v2H1V7h2V5h4z"/></svg>
+      <svg class="cloud c2" viewBox="0 0 24 10" shape-rendering="crispEdges" aria-hidden="true"><path fill="var(--edge)" d="M6 2h4V0h6v2h2v2h4v2h2v4H0V6h2V4h4z"/><path fill="var(--cloud)" d="M7 3h4V1h4v2h2v2h4v2h2v2H1V7h2V5h4z"/></svg>
+      <h1 class="wordmark"><span class="wm-a">Bible</span> <span class="wm-b">Playground</span></h1>
+      <div class="ground" aria-hidden="true"></div>
+    </header>
+
+    <h2 class="section-title">SELECT A WORLD</h2>
+
+    <section class="shelf" aria-label="Games">
+      <a class="card" href="#quiz" style="--game: var(--c-quiz)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">WORLD 1</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#8A5A2B"/><path d="M-300 83h720" stroke="#6E4520" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#A0703C" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#5CBF3A"/><path d="M-300 79h720" stroke="#5CBF3A" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#8BE05C" stroke-width="2"/></g><path d="M86 14h4v-3h6v-3h8v3h4v3h4v4h-26z" fill="#fff" opacity=".9" shape-rendering="crispEdges"/><path d="M96 72c0-8 5-12 10-12s10 4 10 12z" fill="#2F9E44"/><g class="hero" shape-rendering="crispEdges"><rect x="16" y="30" width="22" height="22" fill="#C8642B" stroke="#1A1B3A" stroke-width="1.5"/><path d="M16 41h22M27 30v11M21 41v11M32 41v11" stroke="#7A3410" stroke-width="1.5"/><rect x="82" y="30" width="22" height="22" fill="#C8642B" stroke="#1A1B3A" stroke-width="1.5"/><path d="M82 41h22M93 30v11M87 41v11M98 41v11" stroke="#7A3410" stroke-width="1.5"/><rect x="39" y="26" width="42" height="30" fill="#FFC72C" stroke="#1A1B3A" stroke-width="2"/><path d="M41 28h38v3H44v23h-3z" fill="#FFE58A"/><path d="M79 28v26H41v-3h35V28z" fill="#C98A00"/><g fill="#1A1B3A"><rect x="43" y="30" width="2" height="2"/><rect x="75" y="30" width="2" height="2"/><rect x="43" y="50" width="2" height="2"/><rect x="75" y="50" width="2" height="2"/></g><text x="61" y="51" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="24" fill="#9C5A00">?</text><text x="60" y="50" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="24" fill="#fff">?</text></g><ellipse cx="60" cy="13" rx="6" ry="8" fill="#FFD43B" stroke="#1A1B3A" stroke-width="1.5"/><rect x="59" y="9" width="2" height="8" fill="#C98A00"/><g><path class="s" d="M48 8L49.1 10.9L52 12L49.1 13.1L48 16L46.9 13.1L44 12L46.9 10.9z" fill="#FFF6C8"/><path class="s" d="M73 5L73.8 7.2L76 8L73.8 8.8L73 11L72.2 8.8L70 8L72.2 7.2z" fill="#FFF6C8"/><path class="s" d="M72 17.5L72.7 19.3L74.5 20L72.7 20.7L72 22.5L71.3 20.7L69.5 20L71.3 19.3z" fill="#FFF6C8"/><path class="s" d="M30 15L30.8 17.2L33 18L30.8 18.8L30 21L29.2 18.8L27 18L29.2 17.2z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Bible Quiz</span>
+          <span class="card-text">Ten questions, Bible quiz competition style. They start easy and finish tough.</span>
+          <span class="card-badge" data-badge="quiz"></span>
+        </span>
+      </a>
+
+      <a class="card" href="#ladder" style="--game: var(--c-ladder)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">WORLD 2</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><circle cx="60" cy="10" r="22" fill="#FFF3BF" opacity=".55"/><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#8A5A2B"/><path d="M-300 83h720" stroke="#6E4520" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#A0703C" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#5CBF3A"/><path d="M-300 79h720" stroke="#5CBF3A" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#8BE05C" stroke-width="2"/></g><g class="hero"><path d="M43.5 66.2H76.5M45.0 58.5H75.0M46.5 50.8H73.5M48.0 43.0H72.0M49.5 35.2H70.5M51.0 27.5H69.0M52.5 19.8H67.5" stroke="#E9B872" stroke-width="3"/><path d="M42 74 53 16M78 74 67 16" stroke="#8A5A2B" stroke-width="4" stroke-linecap="square"/></g><g fill="#fff" shape-rendering="crispEdges"><path d="M28 22h10v-5h8v-5h12v4h8v-6h12v6h6v6h8v6H28z"/></g><path d="M28 28h72v-3H28z" fill="#C5D6EA" shape-rendering="crispEdges"/><path d="M4 46h4v-3h6v-3h8v3h4v3h4v4h-26z" fill="#fff" opacity=".7" shape-rendering="crispEdges"/><path d="M92 52h4v-3h6v-3h8v3h4v3h4v4h-26z" fill="#fff" opacity=".7" shape-rendering="crispEdges"/><g><path class="s" d="M16 10L17.1 12.9L20 14L17.1 15.1L16 18L14.9 15.1L12 14L14.9 12.9z" fill="#FFF3BF"/><path class="s" d="M104 7.5L105.3 10.7L108.5 12L105.3 13.3L104 16.5L102.7 13.3L99.5 12L102.7 10.7z" fill="#FFF3BF"/><path class="s" d="M90 27.5L90.7 29.3L92.5 30L90.7 30.7L90 32.5L89.3 30.7L87.5 30L89.3 29.3z" fill="#FFF6C8"/><path class="s" d="M22 27.5L22.7 29.3L24.5 30L22.7 30.7L22 32.5L21.3 30.7L19.5 30L21.3 29.3z" fill="#FFF6C8"/><path class="s" d="M60 1L60.8 3.2L63 4L60.8 4.8L60 7L59.2 4.8L57 4L59.2 3.2z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Jacob's Ladder</span>
+          <span class="card-text">Fifteen rungs to a million points, three zones, expert questions at the top. Use your lifelines wisely.</span>
+          <span class="card-badge" data-badge="ladder"></span>
+        </span>
+      </a>
+
+      <a class="card" href="#blanks" style="--game: var(--c-blanks)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">WORLD 3</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#8A5A2B"/><path d="M-300 83h720" stroke="#6E4520" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#A0703C" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#5CBF3A"/><path d="M-300 79h720" stroke="#5CBF3A" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#8BE05C" stroke-width="2"/></g><ellipse cx="60" cy="72" rx="40" ry="3" fill="#000" opacity=".15"/><g class="hero"><rect x="22" y="18" width="76" height="44" fill="#FBEFCB" stroke="#B08440" stroke-width="1.5"/><rect x="14" y="14" width="10" height="52" rx="4" fill="#D9B26A" stroke="#8A5A2B" stroke-width="1.5"/><rect x="96" y="14" width="10" height="52" rx="4" fill="#D9B26A" stroke="#8A5A2B" stroke-width="1.5"/><path d="M28 27h18M60 27h14M80 27h12M28 36h30M28 45h12M54 45h38M28 54h22M64 54h28" stroke="#8A6A3A" stroke-width="3"/><rect x="48" y="23" width="10" height="8" fill="none" stroke="#C92A2A" stroke-width="1.2" stroke-dasharray="2 1.5"/><rect x="62" y="32" width="30" height="8" fill="none" stroke="#C92A2A" stroke-width="1.2" stroke-dasharray="2 1.5"/><rect x="41" y="41" width="12" height="8" fill="#51CF66" stroke="#1A1B3A" stroke-width="1"/><text x="47" y="47.5" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="7" fill="#fff">A</text><rect x="51" y="50" width="12" height="8" fill="none" stroke="#C92A2A" stroke-width="1.2" stroke-dasharray="2 1.5"/></g><g class="hero"><rect x="66" y="4" width="12" height="12" fill="#FFC72C" stroke="#1A1B3A" stroke-width="1.5"/><rect x="67" y="13" width="10" height="2" fill="#000" opacity=".22"/><text x="72" y="12.64" font-size="7.44" fill="#1A1B3A">?</text></g><g><path class="s" d="M60 3L60.8 5.2L63 6L60.8 6.8L60 9L59.2 6.8L57 6L59.2 5.2z" fill="#FFF6C8"/><path class="s" d="M84 4.5L85 7L87.5 8L85 9L84 11.5L83 9L80.5 8L83 7z" fill="#FFF6C8"/><path class="s" d="M106 7L106.8 9.2L109 10L106.8 10.8L106 13L105.2 10.8L103 10L105.2 9.2z" fill="#FFF6C8"/><path class="s" d="M10 27.5L10.7 29.3L12.5 30L10.7 30.7L10 32.5L9.3 30.7L7.5 30L9.3 29.3z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Story Gaps</span>
+          <span class="card-text">Restore famous Scripture word for word, or fill in the details of key Bible stories.</span>
+          <span class="card-badge" data-badge="blanks"></span>
+        </span>
+      </a>
+
+      <a class="card" href="#riddles" style="--game: var(--c-riddles)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">WORLD 4</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#8A5A2B"/><path d="M-300 83h720" stroke="#6E4520" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#A0703C" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#5CBF3A"/><path d="M-300 79h720" stroke="#5CBF3A" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#8BE05C" stroke-width="2"/></g><path d="M54 -10h12l28 82H26z" fill="#FFF6C8" opacity=".35"/><ellipse cx="60" cy="73" rx="30" ry="4" fill="#FFF6C8" opacity=".75"/><rect x="52" y="-2" width="16" height="7" fill="#1A1B3A"/><g fill="#1A1B3A" opacity=".88"><circle cx="60" cy="36" r="9"/><path d="M44 72c0-17 7-25 16-25s16 8 16 25z"/></g><g class="hero"><text x="92" y="38" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="28" fill="#FFC72C" stroke="#1A1B3A" stroke-width="1.5">?</text><text x="27" y="30" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="16" fill="#fff" stroke="#1A1B3A" stroke-width="1">?</text></g><g><path class="s" d="M80 11L80.8 13.2L83 14L80.8 14.8L80 17L79.2 14.8L77 14L79.2 13.2z" fill="#FFF6C8"/><path class="s" d="M104 47L104.8 49.2L107 50L104.8 50.8L104 53L103.2 50.8L101 50L103.2 49.2z" fill="#FFF6C8"/><path class="s" d="M16 43.5L16.7 45.3L18.5 46L16.7 46.7L16 48.5L15.3 46.7L13.5 46L15.3 45.3z" fill="#FFF6C8"/><path class="s" d="M40 9.5L40.7 11.3L42.5 12L40.7 12.7L40 14.5L39.3 12.7L37.5 12L39.3 11.3z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Who Am I?</span>
+          <span class="card-text">Cryptic Bible riddles. Three clues each, and the sooner you solve it, the more it scores.</span>
+          <span class="card-badge" data-badge="riddles"></span>
+        </span>
+      </a>
+
+      <a class="card" href="#charades" style="--game: var(--c-charades)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">WORLD 5</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#8A5A2B"/><path d="M-300 83h720" stroke="#6E4520" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#A0703C" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#5CBF3A"/><path d="M-300 79h720" stroke="#5CBF3A" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#8BE05C" stroke-width="2"/></g><path d="M51 72v-9a9 9 0 0 1 18 0v9z" fill="#FFC72C"/><circle cx="60" cy="46" r="6" fill="#8D5524"/><path d="M50 58 41 36M70 58 79 36" stroke="#8D5524" stroke-width="5" stroke-linecap="round"/><g class="hero"><rect x="38" y="14" width="44" height="24" rx="3" fill="#1A1B3A"/><rect x="41" y="17" width="38" height="18" fill="#FFF0F6"/><text x="60" y="29" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="8" fill="#A61E4D">JONAH</text><rect x="41" y="32" width="24" height="3" fill="#D6409F"/><circle cx="40" cy="34" r="3.5" fill="#8D5524"/><circle cx="80" cy="34" r="3.5" fill="#8D5524"/></g><path d="M94 10h18v8c0 7-4 11-9 11s-9-4-9-11z" fill="#fff" stroke="#1A1B3A" stroke-width="1.5"/><path d="M97 14h4M105 14h4M98 20q5 5 10 0" stroke="#1A1B3A" stroke-width="1.8" fill="none"/><path d="M28 20l-8-4M26 30H16M92 36l8 2" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><g><path class="s" d="M22 41L22.8 43.2L25 44L22.8 44.8L22 47L21.2 44.8L19 44L21.2 43.2z" fill="#FFF6C8"/><path class="s" d="M100 45L100.8 47.2L103 48L100.8 48.8L100 51L99.2 48.8L97 48L99.2 47.2z" fill="#FFF6C8"/><path class="s" d="M88 1.5L88.7 3.3L90.5 4L88.7 4.7L88 6.5L87.3 4.7L85.5 4L87.3 3.3z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Bible Charades</span>
+          <span class="card-text">A pass-the-phone party game for youth group and fellowship. Act it out, no talking, beat the clock.</span>
+          <span class="card-badge" data-badge="charades"></span>
+        </span>
+      </a>
+      <a class="card" href="#word" style="--game: var(--c-word)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">WORLD 6</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#8A5A2B"/><path d="M-300 83h720" stroke="#6E4520" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#A0703C" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#5CBF3A"/><path d="M-300 79h720" stroke="#5CBF3A" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#8BE05C" stroke-width="2"/></g><g><rect x="14" y="14" width="16" height="16" fill="#868E96" stroke="#1A1B3A" stroke-width="1.5"/><rect x="15" y="27" width="14" height="2" fill="#000" opacity=".22"/><text x="22" y="25.52" font-size="9.92" fill="#fff">F</text><rect x="33" y="14" width="16" height="16" fill="#F2B705" stroke="#1A1B3A" stroke-width="1.5"/><rect x="34" y="27" width="14" height="2" fill="#000" opacity=".22"/><text x="41" y="25.52" font-size="9.92" fill="#fff">A</text><rect x="52" y="14" width="16" height="16" fill="#868E96" stroke="#1A1B3A" stroke-width="1.5"/><rect x="53" y="27" width="14" height="2" fill="#000" opacity=".22"/><text x="60" y="25.52" font-size="9.92" fill="#fff">I</text><rect x="71" y="14" width="16" height="16" fill="#868E96" stroke="#1A1B3A" stroke-width="1.5"/><rect x="72" y="27" width="14" height="2" fill="#000" opacity=".22"/><text x="79" y="25.52" font-size="9.92" fill="#fff">T</text><rect x="90" y="14" width="16" height="16" fill="#868E96" stroke="#1A1B3A" stroke-width="1.5"/><rect x="91" y="27" width="14" height="2" fill="#000" opacity=".22"/><text x="98" y="25.52" font-size="9.92" fill="#fff">H</text></g><g class="hero"><rect x="14" y="36" width="16" height="16" fill="#2F9E44" stroke="#1A1B3A" stroke-width="1.5"/><rect x="15" y="49" width="14" height="2" fill="#000" opacity=".22"/><text x="22" y="47.52" font-size="9.92" fill="#fff">G</text><rect x="33" y="36" width="16" height="16" fill="#2F9E44" stroke="#1A1B3A" stroke-width="1.5"/><rect x="34" y="49" width="14" height="2" fill="#000" opacity=".22"/><text x="41" y="47.52" font-size="9.92" fill="#fff">R</text><rect x="52" y="36" width="16" height="16" fill="#2F9E44" stroke="#1A1B3A" stroke-width="1.5"/><rect x="53" y="49" width="14" height="2" fill="#000" opacity=".22"/><text x="60" y="47.52" font-size="9.92" fill="#fff">A</text><rect x="71" y="36" width="16" height="16" fill="#2F9E44" stroke="#1A1B3A" stroke-width="1.5"/><rect x="72" y="49" width="14" height="2" fill="#000" opacity=".22"/><text x="79" y="47.52" font-size="9.92" fill="#fff">C</text><rect x="90" y="36" width="16" height="16" fill="#2F9E44" stroke="#1A1B3A" stroke-width="1.5"/><rect x="91" y="49" width="14" height="2" fill="#000" opacity=".22"/><text x="98" y="47.52" font-size="9.92" fill="#fff">E</text></g><g><path class="s" d="M10 30.5L11 33L13.5 34L11 35L10 37.5L9 35L6.5 34L9 33z" fill="#FFF6C8"/><path class="s" d="M110 32L111.1 34.9L114 36L111.1 37.1L110 40L108.9 37.1L106 36L108.9 34.9z" fill="#FFF6C8"/><path class="s" d="M60 5.5L60.7 7.3L62.5 8L60.7 8.7L60 10.5L59.3 8.7L57.5 8L59.3 7.3z" fill="#FFF6C8"/><path class="s" d="M100 59.5L100.7 61.3L102.5 62L100.7 62.7L100 64.5L99.3 62.7L97.5 62L99.3 61.3z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Word of the Day</span>
+          <span class="card-text">Guess today’s 5-letter Bible word in 6 tries. Same word for everyone, so compare with your friends.</span>
+          <span class="card-badge" data-badge="word"></span>
+        </span>
+      </a>
+
+      <a class="card" href="#snake" style="--game: var(--c-snake)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">WORLD 7</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#8A5A2B"/><path d="M-300 83h720" stroke="#6E4520" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#A0703C" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#5CBF3A"/><path d="M-300 79h720" stroke="#5CBF3A" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#8BE05C" stroke-width="2"/></g><g shape-rendering="crispEdges"><rect x="20" y="18" width="16" height="12" fill="#FFF4D6" stroke="#1A1B3A" stroke-width="1.2"/><rect x="20" y="18" width="4" height="12" fill="#E03131"/><text x="30" y="26.5" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="5.5" fill="#1A1B3A">EXO</text><rect x="52" y="14" width="16" height="12" fill="#FFF4D6" stroke="#1A1B3A" stroke-width="1.2"/><rect x="52" y="14" width="4" height="12" fill="#7048E8"/><text x="62" y="22.5" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="5.5" fill="#1A1B3A">LEV</text><rect x="100" y="48" width="16" height="12" fill="#FFF4D6" stroke="#1A1B3A" stroke-width="1.2"/><rect x="100" y="48" width="4" height="12" fill="#1971C2"/><text x="110" y="56.5" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="5.5" fill="#1A1B3A">GEN</text></g><path d="M10 62H40V40H70V54H84" stroke="#D8F5A2" stroke-width="16" fill="none" opacity=".4"/><g class="hero" shape-rendering="crispEdges"><path d="M10 62H40V40H70V54H84" stroke="#2B8A3E" stroke-width="9" fill="none"/><path d="M10 62H40V40H70V54H84" stroke="#8CE99A" stroke-width="5" fill="none"/><path d="M10 62H40V40H70V54H84" stroke="#40C057" stroke-width="5" stroke-dasharray="3 3" fill="none"/><rect x="82" y="47" width="14" height="14" fill="#69DB7C" stroke="#2B8A3E" stroke-width="2"/><rect x="89" y="50" width="4" height="4" fill="#fff"/><rect x="91" y="51" width="2" height="2" fill="#1A1B3A"/><path d="M96 56h4" stroke="#E03131" stroke-width="2"/></g><g><path class="s" d="M106 36.5L107 39L109.5 40L107 41L106 43.5L105 41L102.5 40L105 39z" fill="#FFF6C8"/><path class="s" d="M86 27.5L86.7 29.3L88.5 30L86.7 30.7L86 32.5L85.3 30.7L83.5 30L85.3 29.3z" fill="#FFF6C8"/><path class="s" d="M14 41L14.8 43.2L17 44L14.8 44.8L14 47L13.2 44.8L11 44L13.2 43.2z" fill="#FFF6C8"/><path class="s" d="M40 5.5L40.7 7.3L42.5 8L40.7 8.7L40 10.5L39.3 8.7L37.5 8L39.3 7.3z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Books of the Bible Snake</span>
+          <span class="card-text">Glide through Genesis to Malachi, or Matthew to Revelation, in order. Watch out for decoys, and be quick.</span>
+          <span class="card-badge" data-badge="snake"></span>
+        </span>
+      </a>
+
+      <a class="card" href="#timeline" style="--game: var(--c-timeline)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">WORLD 8</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><ellipse cx="22" cy="70" rx="60" ry="34" fill="#3E8E24"/><ellipse cx="104" cy="66" rx="56" ry="40" fill="#2F7A1A"/><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#8A5A2B"/><path d="M-300 83h720" stroke="#6E4520" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#A0703C" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#5CBF3A"/><path d="M-300 79h720" stroke="#5CBF3A" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#8BE05C" stroke-width="2"/></g><path d="M22 92C30 74 70 76 66 62S30 52 46 42 80 34 76 22" stroke="#E9D9A6" stroke-width="9" fill="none" stroke-linecap="round"/><path d="M22 92C30 74 70 76 66 62S30 52 46 42 80 34 76 22" stroke="#C9B57A" stroke-width="1.5" stroke-dasharray="3 4" fill="none"/><g class="hero"><circle cx="40" cy="78" r="7" fill="#DEE2E6" stroke="#1A1B3A" stroke-width="1.5"/><text x="40" y="80.94" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="8.75" fill="#1A1B3A">1</text><circle cx="70" cy="60" r="6" fill="#DEE2E6" stroke="#1A1B3A" stroke-width="1.5"/><text x="70" y="62.52" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="7.5" fill="#1A1B3A">2</text><circle cx="40" cy="46" r="5" fill="#DEE2E6" stroke="#1A1B3A" stroke-width="1.5"/><text x="40" y="48.1" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="6.25" fill="#1A1B3A">3</text><circle cx="74" cy="30" r="4.5" fill="#DEE2E6" stroke="#1A1B3A" stroke-width="1.5"/><text x="74" y="31.89" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="5.625" fill="#1A1B3A">4</text><path d="M78 24V4" stroke="#fff" stroke-width="2"/><path d="M78 4h14l-4 4 4 4H78z" fill="#FFC72C" stroke="#1A1B3A" stroke-width="1"/></g><path d="M92 24h4v-3h6v-3h8v3h4v3h4v4h-26z" fill="#fff" opacity=".85" shape-rendering="crispEdges"/><g><path class="s" d="M100 2.5L101 5L103.5 6L101 7L100 9.5L99 7L96.5 6L99 5z" fill="#FFF6C8"/><path class="s" d="M58 9L58.8 11.2L61 12L58.8 12.8L58 15L57.2 12.8L55 12L57.2 11.2z" fill="#FFF6C8"/><path class="s" d="M14 17.5L14.7 19.3L16.5 20L14.7 20.7L14 22.5L13.3 20.7L11.5 20L13.3 19.3z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Timeline Rush</span>
+          <span class="card-text">Put Bible events in order before the clock runs out. Every level adds one more.</span>
+          <span class="card-badge" data-badge="timeline"></span>
+        </span>
+      </a>
+      <a class="card" href="#ark" style="--game: var(--c-ark)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">WORLD 9</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><path d="M-6 60a40 40 0 0 1 80 0" fill="none" stroke="#FF6B6B" stroke-width="3" opacity=".75"/><path d="M-1 60a35 35 0 0 1 70 0" fill="none" stroke="#FFD43B" stroke-width="3" opacity=".75"/><path d="M4 60a30 30 0 0 1 60 0" fill="none" stroke="#74C0FC" stroke-width="3" opacity=".75"/><g class="hero" shape-rendering="crispEdges"><rect x="38" y="14" width="4" height="22" fill="#F2B705"/><rect x="34" y="11" width="9" height="5" fill="#F2B705"/><rect x="39" y="20" width="2" height="2" fill="#8A5A2B"/><rect x="39" y="27" width="2" height="2" fill="#8A5A2B"/><rect x="35" y="12" width="1.5" height="1.5" fill="#1A1B3A"/><rect x="46" y="14" width="4" height="22" fill="#F2B705"/><rect x="42" y="11" width="9" height="5" fill="#F2B705"/><rect x="47" y="20" width="2" height="2" fill="#8A5A2B"/><rect x="47" y="27" width="2" height="2" fill="#8A5A2B"/><rect x="43" y="12" width="1.5" height="1.5" fill="#1A1B3A"/><path d="M30 36h60v16H30z" fill="#C08A4E" stroke="#1A1B3A" stroke-width="1.5"/><path d="M26 37 60 26l34 11z" fill="#6E4520" stroke="#1A1B3A" stroke-width="1.5"/><rect x="64" y="40" width="20" height="9" fill="#5C3A1A"/><circle cx="69" cy="44" r="4.5" fill="#E8590C"/><circle cx="69" cy="44.5" r="2.8" fill="#FFC72C"/><circle cx="79" cy="44" r="4.5" fill="#E8590C"/><circle cx="79" cy="44.5" r="2.8" fill="#FFC72C"/><path d="M12 52h96l-10 20H22z" fill="#8A5A2B" stroke="#1A1B3A" stroke-width="1.5"/><path d="M16 59h88M20 65h80" stroke="#6E4520" stroke-width="1.5"/></g><g shape-rendering="crispEdges"><path d="M-300 72h720v220h-720z" fill="#1C7ED6"/><path d="M-300 82h720" stroke="#4DABF7" stroke-width="3" stroke-dasharray="10 6"/><path d="M-300 72h720" stroke="#A5D8FF" stroke-width="4" stroke-dasharray="8 4"/></g><path d="M96 12q4-5 8 0 4-5 8 0-4 3-8 2-4 1-8-2z" fill="#fff" stroke="#1A1B3A" stroke-width="1"/><path d="M104 14l-4 5" stroke="#2F9E44" stroke-width="1.5"/><circle cx="99" cy="19" r="1.5" fill="#2F9E44"/><g><path class="s" d="M88 19L88.8 21.2L91 22L88.8 22.8L88 25L87.2 22.8L85 22L87.2 21.2z" fill="#FFF6C8"/><path class="s" d="M112 25.5L112.7 27.3L114.5 28L112.7 28.7L112 30.5L111.3 28.7L109.5 28L111.3 27.3z" fill="#FFF6C8"/><path class="s" d="M20 27.5L20.7 29.3L22.5 30L20.7 30.7L20 32.5L19.3 30.7L17.5 30L19.3 29.3z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Two by Two</span>
+          <span class="card-text">Match the animals in pairs and load the ark before the flood rises. Chain quick pairs for combos.</span>
+          <span class="card-badge" data-badge="ark"></span>
+        </span>
+      </a>
+
+      <a class="card" href="#map" style="--game: var(--c-map)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">WORLD 10</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#8A5A2B"/><path d="M-300 83h720" stroke="#6E4520" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#A0703C" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#5CBF3A"/><path d="M-300 79h720" stroke="#5CBF3A" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#8BE05C" stroke-width="2"/></g><ellipse cx="60" cy="72" rx="42" ry="3" fill="#000" opacity=".15"/><g transform="rotate(-5 60 40)"><rect x="18" y="12" width="84" height="56" fill="#F3E2B3" stroke="#B08440" stroke-width="2"/><path d="M18 12h22c-4 10 2 18-4 28s0 20 2 28H18z" fill="#74C0FC"/><path d="M70 20c-4 6 4 10 0 16s2 12-2 20" stroke="#4DABF7" stroke-width="2" fill="none"/><path d="M84 34l5-8 5 8zM90 40l4-6 4 6z" fill="#B08440"/><path d="M40 58C48 50 54 54 60 44S72 36 78 30" stroke="#C92A2A" stroke-width="1.8" stroke-dasharray="3 2.5" fill="none"/><path d="M96 54v8M92 58h8" stroke="#8A5A2B" stroke-width="1.5"/><path d="M18 68h8l-8-6z" fill="#D9B26A"/></g><ellipse cx="78" cy="38" rx="5" ry="2" fill="#000" opacity=".25"/><g class="hero"><path d="M78 37c-6-8-9-12-9-16a9 9 0 0 1 18 0c0 4-3 8-9 16z" fill="#E03131" stroke="#1A1B3A" stroke-width="1.5"/><circle cx="78" cy="21" r="3.5" fill="#fff"/></g><g><path class="s" d="M92 6.5L93 9L95.5 10L93 11L92 13.5L91 11L88.5 10L91 9z" fill="#FFF6C8"/><path class="s" d="M64 7.5L64.7 9.3L66.5 10L64.7 10.7L64 12.5L63.3 10.7L61.5 10L63.3 9.3z" fill="#FFF6C8"/><path class="s" d="M40 47.5L40.7 49.3L42.5 50L40.7 50.7L40 52.5L39.3 50.7L37.5 50L39.3 49.3z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Bible Map Dash</span>
+          <span class="card-text">Bethlehem, Jericho, Damascus. Tap where each place is on the map. Closer means more points.</span>
+          <span class="card-badge" data-badge="map"></span>
+        </span>
+      </a>
+      <a class="card" href="#crossword" style="--game: var(--c-crossword)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">WORLD 11</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#8A5A2B"/><path d="M-300 83h720" stroke="#6E4520" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#A0703C" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#5CBF3A"/><path d="M-300 79h720" stroke="#5CBF3A" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#8BE05C" stroke-width="2"/></g><ellipse cx="66" cy="72" rx="34" ry="3" fill="#000" opacity=".15"/><g class="hero" shape-rendering="crispEdges"><rect x="54" y="8" width="12" height="12" fill="#fff" stroke="#1A1B3A" stroke-width="1.5"/><rect x="55" y="17" width="10" height="2" fill="#000" opacity=".22"/><text x="60" y="16.64" font-size="7.44" fill="#1A1B3A">N</text><rect x="42" y="20" width="12" height="12" fill="#fff" stroke="#1A1B3A" stroke-width="1.5"/><rect x="43" y="29" width="10" height="2" fill="#000" opacity=".22"/><text x="48" y="28.64" font-size="7.44" fill="#1A1B3A">M</text><rect x="54" y="20" width="12" height="12" fill="#fff" stroke="#1A1B3A" stroke-width="1.5"/><rect x="55" y="29" width="10" height="2" fill="#000" opacity=".22"/><text x="60" y="28.64" font-size="7.44" fill="#1A1B3A">O</text><rect x="66" y="20" width="12" height="12" fill="#fff" stroke="#1A1B3A" stroke-width="1.5"/><rect x="67" y="29" width="10" height="2" fill="#000" opacity=".22"/><text x="72" y="28.64" font-size="7.44" fill="#1A1B3A">S</text><rect x="78" y="20" width="12" height="12" fill="#fff" stroke="#1A1B3A" stroke-width="1.5"/><rect x="79" y="29" width="10" height="2" fill="#000" opacity=".22"/><text x="84" y="28.64" font-size="7.44" fill="#1A1B3A">E</text><rect x="90" y="20" width="12" height="12" fill="#fff" stroke="#1A1B3A" stroke-width="1.5"/><rect x="91" y="29" width="10" height="2" fill="#000" opacity=".22"/><text x="96" y="28.64" font-size="7.44" fill="#1A1B3A">S</text><rect x="54" y="32" width="12" height="12" fill="#fff" stroke="#1A1B3A" stroke-width="1.5"/><rect x="55" y="41" width="10" height="2" fill="#000" opacity=".22"/><text x="60" y="40.64" font-size="7.44" fill="#1A1B3A">A</text><rect x="78" y="32" width="12" height="12" fill="#fff" stroke="#1A1B3A" stroke-width="1.5"/><rect x="79" y="41" width="10" height="2" fill="#000" opacity=".22"/><text x="84" y="40.64" font-size="7.44" fill="#1A1B3A">V</text><rect x="54" y="44" width="12" height="12" fill="#fff" stroke="#1A1B3A" stroke-width="1.5"/><rect x="55" y="53" width="10" height="2" fill="#000" opacity=".22"/><text x="60" y="52.64" font-size="7.44" fill="#1A1B3A">H</text><rect x="78" y="44" width="12" height="12" fill="#FFE066" stroke="#1A1B3A" stroke-width="1.5"/><rect x="79" y="53" width="10" height="2" fill="#000" opacity=".22"/><text x="84" y="52.64" font-size="7.44" fill="#1A1B3A"></text><rect x="83" y="47" width="2" height="7" fill="#1A1B3A"/></g><g transform="rotate(35 26 52)"><rect x="22" y="30" width="7" height="30" fill="#FFC72C" stroke="#1A1B3A" stroke-width="1.2"/><path d="M22 60h7l-3.5 7z" fill="#F3E2B3" stroke="#1A1B3A" stroke-width="1.2"/><rect x="22" y="27" width="7" height="4" fill="#F783AC" stroke="#1A1B3A" stroke-width="1.2"/></g><g><path class="s" d="M100 36L101.1 38.9L104 40L101.1 41.1L100 44L98.9 41.1L96 40L98.9 38.9z" fill="#FFF6C8"/><path class="s" d="M36 9L36.8 11.2L39 12L36.8 12.8L36 15L35.2 12.8L33 12L35.2 11.2z" fill="#FFF6C8"/><path class="s" d="M108 5.5L108.7 7.3L110.5 8L108.7 8.7L108 10.5L107.3 8.7L105.5 8L107.3 7.3z" fill="#FFF6C8"/><path class="s" d="M72 59.5L72.7 61.3L74.5 62L72.7 62.7L72 64.5L71.3 62.7L69.5 62L71.3 61.3z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Bible Crossword</span>
+          <span class="card-text">A brand-new crossword every time. Same daily puzzle for everyone, plus unlimited practice.</span>
+          <span class="card-badge" data-badge="crossword"></span>
+        </span>
+      </a>
+      <a class="card" href="#verse" style="--game: var(--c-verse)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">WORLD 12</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#8A5A2B"/><path d="M-300 83h720" stroke="#6E4520" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#A0703C" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#5CBF3A"/><path d="M-300 79h720" stroke="#5CBF3A" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#8BE05C" stroke-width="2"/></g><g class="hero"><path d="M12 30q24-6 48 2 24-8 48-2v40q-24-6-48 2-24-8-48-2z" fill="#7A2E2E" stroke="#1A1B3A" stroke-width="1.5"/><path d="M16 28q22-6 44 2v38q-22-8-44-2zM60 30q22-8 44-2v38q-22-6-44 2z" fill="#FFFDF5" stroke="#B08440" stroke-width="1"/><path d="M24 34h28M24 40h24M24 46h28M24 52h20M68 34h28M72 40h24M68 46h28" stroke="#ADB5BD" stroke-width="2"/><path d="M60 30v38" stroke="#B08440" stroke-width="1"/><path d="M62 66v12l3-3 3 3V66" fill="#FFC72C"/></g><circle cx="80" cy="30" r="13" fill="#E7F5FF" fill-opacity=".85" stroke="#1A1B3A" stroke-width="3"/><path d="M72 26h16M72 32h11" stroke="#1864AB" stroke-width="3"/><path d="M89 39l10 11" stroke="#8A5A2B" stroke-width="6" stroke-linecap="round"/><path d="M75 24a7 7 0 0 1 6-4" stroke="#fff" stroke-width="2" fill="none"/><g><path class="s" d="M100 8L101.1 10.9L104 12L101.1 13.1L100 16L98.9 13.1L96 12L98.9 10.9z" fill="#FFF6C8"/><path class="s" d="M30 11L30.8 13.2L33 14L30.8 14.8L30 17L29.2 14.8L27 14L29.2 13.2z" fill="#FFF6C8"/><path class="s" d="M62 7.5L62.7 9.3L64.5 10L62.7 10.7L62 12.5L61.3 10.7L59.5 10L61.3 9.3z" fill="#FFF6C8"/><path class="s" d="M108 37.5L108.7 39.3L110.5 40L108.7 40.7L108 42.5L107.3 40.7L105.5 40L107.3 39.3z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Where Is It Written?</span>
+          <span class="card-text">Read a verse and pick the book it comes from. Bonus points for the chapter. Try streak mode.</span>
+          <span class="card-badge" data-badge="verse"></span>
+        </span>
+      </a>
+      <a class="card" href="#trail" style="--game: var(--c-trail)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">WORLD 13</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><path d="M-300 46h720v30h-720z" fill="#EBC77A"/><path d="M-6 46l14-12 10 8 14-14 18 18zM80 46l14-10 12 8 10-6 14 8z" fill="#9C7BB5" opacity=".8"/><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#C99A4B"/><path d="M-300 83h720" stroke="#A87A35" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#D9AE63" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#E3B964"/><path d="M-300 79h720" stroke="#E3B964" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#F6DFA4" stroke-width="2"/></g><path d="M44 92c-4-10 22-14 14-24s8-14 18-22" stroke="#F6E2AE" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M44 92c-4-10 22-14 14-24s8-14 18-22" stroke="#C99A4B" stroke-width="1.2" stroke-dasharray="2 4" fill="none"/><path d="M10 66l13-18.2 13 18.2z" fill="#F8F0E3" stroke="#1A1B3A" stroke-width="1.2"/><path d="M23 66l-3 0 3-10.01 3 10.01z" fill="#1A1B3A" opacity=".6"/><path d="M30 66l8-11.2 8 11.2z" fill="#E8590C" stroke="#1A1B3A" stroke-width="1.2"/><path d="M38 66l-3 0 3-6.16 3 6.16z" fill="#1A1B3A" opacity=".6"/><path d="M84 66l7-9.8 7 9.8z" fill="#F8F0E3" stroke="#1A1B3A" stroke-width="1.2"/><path d="M91 66l-3 0 3-5.39 3 5.39z" fill="#1A1B3A" opacity=".6"/><g class="hero"><path d="M98 66c-8-10-2-20-6-30 4 2 4 6 4 6 0-10 4-18 2-28 6 6 8 16 6 24 2-2 2-6 2-6 4 10 2 24-8 34z" fill="#FF922B"/><path d="M99 64c-4-8 0-14-2-22 4 4 6 10 4 16 2-2 2-4 2-4 2 6 0 8-4 10z" fill="#FFD43B"/></g><path d="M86 6h4v-3h6v-3h8v3h4v3h4v4h-26z" fill="#fff" opacity=".95" shape-rendering="crispEdges"/><g><path class="s" d="M86 27.5L86.7 29.3L88.5 30L86.7 30.7L86 32.5L85.3 30.7L83.5 30L85.3 29.3z" fill="#FFD43B"/><path class="s" d="M112 21L112.8 23.2L115 24L112.8 24.8L112 27L111.2 24.8L109 24L111.2 23.2z" fill="#FFD43B"/><path class="s" d="M60 11L60.8 13.2L63 14L60.8 14.8L60 17L59.2 14.8L57 14L59.2 13.2z" fill="#FFF6C8"/><path class="s" d="M30 15.5L30.7 17.3L32.5 18L30.7 18.7L30 20.5L29.3 18.7L27.5 18L29.3 17.3z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Wilderness Trail</span>
+          <span class="card-text">Lead Israel from Egypt to the Promised Land. Manage manna, water, morale and faith. Six endings to find, and no two journeys are the same.</span>
+          <span class="card-badge" data-badge="trail"></span>
+        </span>
+      </a>
+      <a class="card" href="#truths" style="--game: var(--c-truths)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">WORLD 14</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#8A5A2B"/><path d="M-300 83h720" stroke="#6E4520" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#A0703C" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#5CBF3A"/><path d="M-300 79h720" stroke="#5CBF3A" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#8BE05C" stroke-width="2"/></g><ellipse cx="60" cy="72" rx="40" ry="3" fill="#000" opacity=".15"/><g transform="rotate(-12 29 70)"><rect x="16" y="30" width="26" height="38" rx="3" fill="#fff" stroke="#1A1B3A" stroke-width="1.8"/><rect x="19" y="33" width="20" height="5" fill="#2F9E44"/><path d="M22 52l5 5 9-11" stroke="#2F9E44" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="rotate(0 60 66)"><rect x="47" y="26" width="26" height="38" rx="3" fill="#fff" stroke="#1A1B3A" stroke-width="1.8"/><rect x="50" y="29" width="20" height="5" fill="#2F9E44"/><path d="M53 48l5 5 9-11" stroke="#2F9E44" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g><g class="hero"><g transform="rotate(12 91 62)"><rect x="78" y="22" width="26" height="38" rx="3" fill="#fff" stroke="#1A1B3A" stroke-width="1.8"/><rect x="81" y="25" width="20" height="5" fill="#E03131"/><path d="M84 44l14 14M98 44l-14 14" stroke="#E03131" stroke-width="5" stroke-linecap="round"/></g></g><text x="100" y="18" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="12" fill="#fff" stroke="#1A1B3A" stroke-width=".8">!</text><g><path class="s" d="M40 10.5L41 13L43.5 14L41 15L40 17.5L39 15L36.5 14L39 13z" fill="#FFF6C8"/><path class="s" d="M12 19.5L12.7 21.3L14.5 22L12.7 22.7L12 24.5L11.3 22.7L9.5 22L11.3 21.3z" fill="#FFF6C8"/><path class="s" d="M66 7.5L66.7 9.3L68.5 10L66.7 10.7L66 12.5L65.3 10.7L63.5 10L65.3 9.3z" fill="#FFF6C8"/><path class="s" d="M112 27.5L112.7 29.3L114.5 30L112.7 30.7L112 32.5L111.3 30.7L109.5 30L111.3 29.3z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Two Truths and a Lie</span>
+          <span class="card-text">Three statements about a Bible character. Two are true, one is a classic mix-up. Catch the lie fast.</span>
+          <span class="card-badge" data-badge="truths"></span>
+        </span>
+      </a>
+      <a class="card" href="#sling" style="--game: var(--c-sling)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">WORLD 15</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><path d="M-300 72V54q40-10 80 0t80 0 80 0v18z" fill="#6C7A89" opacity=".5"/><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#8A5A2B"/><path d="M-300 83h720" stroke="#6E4520" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#A0703C" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#5CBF3A"/><path d="M-300 79h720" stroke="#5CBF3A" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#8BE05C" stroke-width="2"/></g><g fill="#272B3E" opacity=".82"><path d="M76 72V44q0-10 12-12h20q12 2 12 12v28z"/><circle cx="98" cy="20" r="11"/><path d="M86 18a12 12 0 0 1 24 0z" fill="#3B4258"/><path d="M98 3v6" stroke="#272B3E" stroke-width="4"/><path d="M118 4v68" stroke="#272B3E" stroke-width="3"/></g><path d="M115 4l3-6 3 6z" fill="#272B3E"/><path d="M9 72v-3a9 9 0 0 1 18 0v3z" fill="#4DABF7"/><circle cx="18" cy="52" r="6" fill="#C68642"/><path d="M11.7 50a6.5 6.5 0 0 1 12.6 0z" fill="#fff"/><path d="M24 58l8-14" stroke="#C68642" stroke-width="3.5" stroke-linecap="round"/><path d="M32 44c4-10 12-12 14-6" stroke="#8A5A2B" stroke-width="1.5" fill="none"/><path d="M34 28q16-14 30-8" stroke="#fff" stroke-width="2" stroke-dasharray="3 3" fill="none" opacity=".8"/><g class="hero"><circle cx="68" cy="22" r="4.5" fill="#CED4DA" stroke="#1A1B3A" stroke-width="1.5"/><path d="M66 20h2" stroke="#fff" stroke-width="1.5"/></g><g><path class="s" d="M60 5L60.8 7.2L63 8L60.8 8.8L60 11L59.2 8.8L57 8L59.2 7.2z" fill="#FFF6C8"/><path class="s" d="M12 13.5L12.7 15.3L14.5 16L12.7 16.7L12 18.5L11.3 16.7L9.5 16L11.3 15.3z" fill="#FFF6C8"/><path class="s" d="M48 39.5L48.7 41.3L50.5 42L48.7 42.7L48 44.5L47.3 42.7L45.5 42L47.3 41.3z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">David's Sling</span>
+          <span class="card-text">See the valley through David’s eyes. Pull back, mind the wind and be quick: the clock is running!</span>
+          <span class="card-badge" data-badge="sling"></span>
+        </span>
+      </a>
+      <a class="card" href="#wars" style="--game: var(--c-wars)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">WORLD 16</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#8A5A2B"/><path d="M-300 83h720" stroke="#6E4520" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#A0703C" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#5CBF3A"/><path d="M-300 79h720" stroke="#5CBF3A" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#8BE05C" stroke-width="2"/></g><g shape-rendering="crispEdges"><rect x="44" y="52" width="32" height="20" fill="#FFC72C" stroke="#1A1B3A" stroke-width="1.5"/><rect x="16" y="58" width="28" height="14" fill="#CED4DA" stroke="#1A1B3A" stroke-width="1.5"/><rect x="76" y="62" width="28" height="10" fill="#E8590C" stroke="#1A1B3A" stroke-width="1.5"/><text x="60" y="66" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="10" fill="#1A1B3A">1</text><text x="30" y="69" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="9" fill="#1A1B3A">2</text><text x="90" y="70.5" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="8" fill="#fff">3</text></g><g class="hero"><path d="M48 18h24v8c0 9-5 14-12 14s-12-5-12-14z" fill="#FFD43B" stroke="#1A1B3A" stroke-width="1.5"/><path d="M48 22h-5c0 7 3 10 7 10M72 22h5c0 7-3 10-7 10" fill="none" stroke="#FFD43B" stroke-width="2.5"/><rect x="57" y="40" width="6" height="5" fill="#E0A800"/><rect x="51" y="45" width="18" height="7" fill="#8A5A2B" stroke="#1A1B3A" stroke-width="1.2"/><path d="M54 21v8" stroke="#FFF3BF" stroke-width="2"/></g><path d="M8 72V8M112 72V8" stroke="#fff" stroke-width="2"/><path d="M9 9h20l-5 7 5 7H9z" fill="#E03131" stroke="#1A1B3A" stroke-width="1"/><path d="M111 9H91l5 7-5 7h20z" fill="#2F6FED" stroke="#1A1B3A" stroke-width="1"/><g shape-rendering="crispEdges"><rect x="36" y="10" width="3" height="3" fill="#51CF66"/><rect x="82" y="14" width="3" height="3" fill="#FF6B6B"/><rect x="30" y="30" width="3" height="3" fill="#74C0FC"/><rect x="88" y="34" width="3" height="3" fill="#FFD43B"/></g><g><path class="s" d="M60 4L61.1 6.9L64 8L61.1 9.1L60 12L58.9 9.1L56 8L58.9 6.9z" fill="#FFF6C8"/><path class="s" d="M40 41.5L40.7 43.3L42.5 44L40.7 44.7L40 46.5L39.3 44.7L37.5 44L39.3 43.3z" fill="#FFF6C8"/><path class="s" d="M80 43.5L80.7 45.3L82.5 46L80.7 46.7L80 48.5L79.3 46.7L77.5 46L79.3 45.3z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Department Wars</span>
+          <span class="card-text">Choir vs Ushers vs Media and more: a team party game for fellowship and camp, with one host and a big scoreboard.</span>
+          <span class="card-badge" data-badge="wars"></span>
+        </span>
+      </a>
+    </section>
+
+    <section class="discover" aria-labelledby="discover-title">
+      <h2 class="section-title" id="discover-title">BONUS LEVEL: DISCOVER YOURSELF</h2>
+      <a class="card card-wide" href="#gifts" style="--game: var(--c-gifts)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">BONUS</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#8A5A2B"/><path d="M-300 83h720" stroke="#6E4520" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#A0703C" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#5CBF3A"/><path d="M-300 79h720" stroke="#5CBF3A" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#8BE05C" stroke-width="2"/></g><path d="M0 74q30-8 46-2t36-2" stroke="#E9D9A6" stroke-width="5" fill="none"/><path d="M15 72v-5a9 9 0 0 1 18 0v5z" fill="#2F9E44"/><circle cx="24" cy="50" r="6" fill="#6B3E26"/><path d="M17.7 48a6.5 6.5 0 0 1 12.6 0z" fill="#FFC72C"/><g shape-rendering="crispEdges"><rect x="68" y="44" width="36" height="28" fill="#fff" stroke="#1A1B3A" stroke-width="1.5"/><path d="M64 44 86 30l22 14z" fill="#C92A2A" stroke="#1A1B3A" stroke-width="1.5"/><rect x="80" y="20" width="12" height="12" fill="#fff" stroke="#1A1B3A" stroke-width="1.5"/><path d="M86 8v10M82 12h8" stroke="#FFC72C" stroke-width="2.5"/><rect x="80" y="56" width="12" height="16" fill="#FFD43B" stroke="#1A1B3A" stroke-width="1.2"/><rect x="72" y="50" width="5" height="5" fill="#74C0FC"/><rect x="95" y="50" width="5" height="5" fill="#74C0FC"/></g><g class="hero"><path d="M48 46c-6-7-9-11-9-15a9 9 0 0 1 18 0c0 4-3 8-9 15z" fill="#FFC72C" stroke="#1A1B3A" stroke-width="1.5"/><path d="M48 27l1.5 3 3 .4-2.2 2 .6 3-2.9-1.5-2.9 1.5.6-3-2.2-2 3-.4z" fill="#fff"/></g><g><path class="s" d="M66 15L66.8 17.2L69 18L66.8 18.8L66 21L65.2 18.8L63 18L65.2 17.2z" fill="#FFF6C8"/><path class="s" d="M110 21L110.8 23.2L113 24L110.8 24.8L110 27L109.2 24.8L107 24L109.2 23.2z" fill="#FFF6C8"/><path class="s" d="M34 11.5L34.7 13.3L36.5 14L34.7 14.7L34 16.5L33.3 14.7L31.5 14L33.3 13.3z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Find Your Place</span>
+          <span class="card-text">A 12-question quiz with no wrong answers. Find out what you're passionate about, where you could serve at church, and which team can help you grow.</span>
+          <span class="card-badge" data-badge="gifts"></span>
+        </span>
+      </a>
+
+      <a class="card card-wide" href="#character" style="--game: var(--c-character)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">BONUS</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#8A5A2B"/><path d="M-300 83h720" stroke="#6E4520" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#A0703C" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#5CBF3A"/><path d="M-300 79h720" stroke="#5CBF3A" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#8BE05C" stroke-width="2"/></g><rect x="34" y="10" width="52" height="56" fill="#E5DBFF" stroke="#FFC72C" stroke-width="5"/><rect x="34" y="10" width="52" height="56" fill="none" stroke="#1A1B3A" stroke-width="1"/><g fill="#FFC72C" stroke="#1A1B3A" stroke-width="1"><rect x="30" y="6" width="8" height="8"/><rect x="82" y="6" width="8" height="8"/><rect x="30" y="62" width="8" height="8"/><rect x="82" y="62" width="8" height="8"/></g><path d="M43 64c0-12 7-18 17-18s17 6 17 18z" fill="#9C36B5"/><circle cx="60" cy="36" r="9" fill="#8D5524"/><path d="M51 34a9 9 0 0 1 18 0c-4-3-14-3-18 0z" fill="#3B2314"/><g class="hero"><path d="M50 24l3-7 4 4 3-6 3 6 4-4 3 7z" fill="#FFD43B" stroke="#1A1B3A" stroke-width="1.2"/></g><path d="M16 72V26c0-8 10-8 10 0" stroke="#8A5A2B" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M94 22h20v14h-12l-5 5v-5h-3z" fill="#fff" stroke="#1A1B3A" stroke-width="1.2"/><text x="104" y="33.5" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="11" fill="#862E9C">?</text><g><path class="s" d="M104 48.5L105 51L107.5 52L105 53L104 55.5L103 53L100.5 52L103 51z" fill="#FFF6C8"/><path class="s" d="M24 11.5L24.7 13.3L26.5 14L24.7 14.7L24 16.5L23.3 14.7L21.5 14L23.3 13.3z" fill="#FFF6C8"/><path class="s" d="M44 2L44.6 3.4L46 4L44.6 4.6L44 6L43.4 4.6L42 4L43.4 3.4z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Which Bible Character Are You?</span>
+          <span class="card-text">Ten quick questions, just for fun. Are you a Peter, an Esther, a David or a Barnabas? Share your result and compare with friends.</span>
+          <span class="card-badge" data-badge="character"></span>
+        </span>
+      </a>
+      <a class="card card-wide" href="#career" style="--game: var(--c-career)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">BONUS</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#8A5A2B"/><path d="M-300 83h720" stroke="#6E4520" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#A0703C" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#5CBF3A"/><path d="M-300 79h720" stroke="#5CBF3A" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#8BE05C" stroke-width="2"/></g><rect x="57" y="14" width="6" height="58" fill="#8A5A2B" stroke="#1A1B3A" stroke-width="1.2"/><g class="hero"><path d="M62 18h30l5 5-5 5h-30z" fill="#1971C2" stroke="#1A1B3A" stroke-width="1.2"/><text x="78" y="25.3" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="6" fill="#fff">TEACH</text><path d="M28 32h30v10h-30l-5-5z" fill="#2F9E44" stroke="#1A1B3A" stroke-width="1.2"/><text x="42" y="39.3" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="6" fill="#fff">BUILD</text><path d="M62 46h28l5 5-5 5h-28z" fill="#E8590C" stroke="#1A1B3A" stroke-width="1.2"/><text x="77" y="53.3" font-family="Chakra Petch,sans-serif" font-weight="700" text-anchor="middle" font-size="6" fill="#fff">HEAL</text></g><rect x="20" y="58" width="22" height="14" rx="2" fill="#8A5A2B" stroke="#1A1B3A" stroke-width="1.2"/><path d="M27 58v-3h8v3" fill="none" stroke="#1A1B3A" stroke-width="1.5"/><rect x="20" y="63" width="22" height="2" fill="#6E4520"/><path d="M60 2l2 4.5 5 .5-3.7 3.4 1 4.9L60 13l-4.3 2.3 1-4.9L53 7l5-.5z" fill="#FFD43B" stroke="#1A1B3A" stroke-width="1"/><g><path class="s" d="M100 8.5L101 11L103.5 12L101 13L100 15.5L99 13L96.5 12L99 11z" fill="#FFF6C8"/><path class="s" d="M16 27L16.8 29.2L19 30L16.8 30.8L16 33L15.2 30.8L13 30L15.2 29.2z" fill="#FFF6C8"/><path class="s" d="M104 59.5L104.7 61.3L106.5 62L104.7 62.7L104 64.5L103.3 62.7L101.5 62L103.3 61.3z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Kingdom Career Match</span>
+          <span class="card-text">What you love plus what you're good at equals a way to serve God. Find your top 3 career paths, courses to look at, and a Bible person who did similar work.</span>
+          <span class="card-badge" data-badge="career"></span>
+        </span>
+      </a>
+      <a class="card card-wide" href="#twin" style="--game: var(--c-twin)">
+        <span class="card-art" aria-hidden="true">
+          <span class="world-tag">BONUS</span>
+          <svg class="cv" viewBox="0 0 120 90" preserveAspectRatio="xMidYMax meet"><circle cx="86" cy="72" r="22" fill="#FFD43B"/><circle cx="86" cy="72" r="30" fill="#FFF3BF" opacity=".4"/><g shape-rendering="crispEdges"><path d="M-300 76h720v220h-720z" fill="#8A5A2B"/><path d="M-300 83h720" stroke="#6E4520" stroke-width="3" stroke-dasharray="4 8"/><path d="M-296 89h720" stroke="#A0703C" stroke-width="2" stroke-dasharray="3 11"/><path d="M-300 72h720v6h-720z" fill="#5CBF3A"/><path d="M-300 79h720" stroke="#5CBF3A" stroke-width="3" stroke-dasharray="5 7"/><path d="M-300 73h720" stroke="#8BE05C" stroke-width="2"/></g><path d="M0 82q40-8 70-6t50-4" stroke="#E9D9A6" stroke-width="5" fill="none"/><g fill="#fff" opacity=".6"><rect x="10" y="80" width="3" height="2"/><rect x="18" y="78" width="3" height="2"/><rect x="26" y="80" width="3" height="2"/></g><path d="M35 72v-9a9 9 0 0 1 18 0v9z" fill="#E03131"/><circle cx="44" cy="46" r="6" fill="#8D5524"/><path d="M37.7 44a6.5 6.5 0 0 1 12.6 0z" fill="#FFC72C"/><path d="M55 72v-7a9 9 0 0 1 18 0v7z" fill="#1971C2"/><circle cx="64" cy="48" r="6" fill="#C68642"/><path d="M57.7 46a6.5 6.5 0 0 1 12.6 0z" fill="#3B2314"/><path d="M53 62h2" stroke="#8D5524" stroke-width="4" stroke-linecap="round"/><g class="hero"><path d="M54 26c-2-4-9-3-9 2 0 5 9 10 9 10s9-5 9-10c0-5-7-6-9-2z" fill="#FF6B6B" stroke="#1A1B3A" stroke-width="1.2"/></g><path d="M10 20h4v-3h6v-3h8v3h4v3h4v4h-26z" fill="#fff" opacity=".85" shape-rendering="crispEdges"/><g><path class="s" d="M80 26.5L81 29L83.5 30L81 31L80 33.5L79 31L76.5 30L79 29z" fill="#FFF6C8"/><path class="s" d="M100 37.5L100.7 39.3L102.5 40L100.7 40.7L100 42.5L99.3 40.7L97.5 40L99.3 39.3z" fill="#FFF6C8"/><path class="s" d="M30 31.5L30.7 33.3L32.5 34L30.7 34.7L30 36.5L29.3 34.7L27.5 34L29.3 33.3z" fill="#FFF6C8"/></g></svg>
+        </span>
+        <span class="card-body">
+          <span class="card-title">Your Bible Journey Twin</span>
+          <span class="card-text">Waiting, starting over, feeling small or stepping up? Meet the Bible person whose journey looks like your season.</span>
+          <span class="card-badge" data-badge="twin"></span>
+        </span>
+      </a>
+    </section>
+
+    <footer class="foot">
+      <p class="foot-credit">Created with <span class="foot-heart" aria-label="love">♥</span> by Bolarinwa Timi</p>
+      <p class="foot-links">
+        <a class="foot-icon" href="https://www.instagram.com/tipsybrush/" target="_blank" rel="noopener" aria-label="Instagram (@tipsybrush)" title="Instagram @tipsybrush">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor"/></svg>
+        </a>
+        <a class="foot-icon" href="https://x.com/the_tipsybrush" target="_blank" rel="noopener" aria-label="X (@the_tipsybrush)" title="X @the_tipsybrush">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M17.75 3h3.07l-6.7 7.66L22 21h-6.17l-4.83-6.32L5.47 21H2.4l7.17-8.2L2 3h6.33l4.37 5.77L17.75 3Zm-1.08 16.17h1.7L7.4 4.74H5.58l11.09 14.43Z"/></svg>
+        </a>
+        <a class="foot-icon" href="mailto:bolarinwatimi@gmail.com" aria-label="Email bolarinwatimi@gmail.com" title="bolarinwatimi@gmail.com">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        </a>
+        <a id="coffee-link" class="foot-coffee" href="#" target="_blank" rel="noopener" hidden>☕ Support this site</a>
+      </p>
+      <p>Bible quotations are from the King James Version, which is in the public domain. Nobody needs to sign up to play. Leaderboard names are optional nicknames.</p>
+    </footer>
+  </main>
+
+  <main id="view" hidden>
+    <nav class="crumb"><a href="#" class="btn btn-small" style="text-decoration:none">&larr; World map</a></nav>
+    <div id="stage"></div>
+    <p class="key-hint" id="key-hint" aria-hidden="true"></p>
+  </main>
+
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+<script src="js/leaderboard.js"></script>
+<script src="js/player.js"></script>
+<script src="js/shop.js"></script>
+<script src="js/share.js"></script>
+<script>BP.start();</script>
+</body>
+</html>

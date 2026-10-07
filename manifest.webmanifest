@@ -1,0 +1,16 @@
+{
+  "name": "Bible Playground",
+  "short_name": "Bible Play",
+  "description": "Retro-style Bible games for teens and young adults.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "any",
+  "background_color": "#1B1C3D",
+  "theme_color": "#1B1C3D",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

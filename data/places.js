@@ -1,0 +1,85 @@
+// Places for Bible Map Dash and the Department Wars "Where in the Bible?" round.
+// lat/lon are the real-world locations (approximate for ancient sites), all inside the map window in js/map.js.
+// clue: shown with the name (never contains the name). note: shown after the guess, linking the place to the big story.
+window.BIBLE_PLACES = [
+  // Jerusalem and the hill country of Judah
+  { name: 'Jerusalem', lat: 31.778, lon: 35.235, clue: 'King David’s city, where Jesus died and rose again.', note: 'Jesus wept over this city, then gave his life here for the whole world (Luke 19:41).' },
+  { name: 'Bethlehem', lat: 31.705, lon: 35.200, clue: 'Where Jesus was born, in David’s hometown.', note: 'Micah said a ruler would come from little Bethlehem, 700 years before Jesus was born there (Micah 5:2).' },
+  { name: 'Bethany', lat: 31.771, lon: 35.261, clue: 'The village of Mary, Martha and their brother Lazarus.', note: 'Jesus called Lazarus out of his tomb here and said, “I am the resurrection, and the life” (John 11:25).' },
+  { name: 'Mount of Olives', lat: 31.779, lon: 35.245, clue: 'The hill facing the temple where Jesus often went to pray.', note: 'From Olivet the disciples watched Jesus taken up into heaven, with a promise that he will come again (Acts 1:11–12).' },
+  { name: 'Hebron', lat: 31.530, lon: 35.095, clue: 'Abraham was buried here, and David first reigned here.', note: 'God promised this land to Abraham. Every promise to Abraham finds its yes in Jesus (2 Corinthians 1:20).' },
+  { name: 'Tekoa', lat: 31.633, lon: 35.220, clue: 'Hometown of a herdsman and fig picker whom God made a prophet.', note: 'Amos said, “I was no prophet” (Amos 7:14). God still calls ordinary people from ordinary jobs.' },
+  { name: 'Gibeon', lat: 31.847, lon: 35.184, clue: 'Its people tricked Joshua, and young Solomon asked God for wisdom here.', note: 'God offered Solomon anything, and he asked for wisdom (1 Kings 3:5–9). In Jesus are hidden all the treasures of wisdom (Colossians 2:3).' },
+  { name: 'Mizpah', lat: 31.886, lon: 35.216, clue: 'Samuel gathered Israel here to pray, and Saul was chosen king by lot.', note: 'After a victory near here Samuel set up a stone and said, “Hitherto hath the LORD helped us” (1 Samuel 7:12).' },
+  { name: 'Ramah', lat: 31.851, lon: 35.233, clue: 'Samuel’s home town, where he judged Israel.', note: 'Matthew links Rachel weeping in this town to the grief in Bethlehem when Jesus was a baby (Matthew 2:18).' },
+  { name: 'Gibeah', lat: 31.824, lon: 35.230, clue: 'King Saul’s hometown, just north of Jerusalem.', note: 'Saul looked like a king, but his heart drifted. God was looking for a king after his own heart (1 Samuel 13:14).' },
+  { name: 'Anathoth', lat: 31.811, lon: 35.260, clue: 'Jeremiah’s hometown, where he bought a field while the enemy was at the gate.', note: 'Buying land during a siege was Jeremiah’s way of saying God’s people had a future (Jeremiah 32:15).' },
+  { name: 'Michmash', lat: 31.871, lon: 35.276, clue: 'Jonathan and his armour-bearer climbed a cliff here to face a Philistine outpost.', note: 'Jonathan said, “There is no restraint to the LORD to save by many or by few” (1 Samuel 14:6).' },
+  { name: 'Bethel', lat: 31.930, lon: 35.222, clue: 'Jacob dreamed of a ladder to heaven here.', note: 'Jesus said he is the real ladder between heaven and earth (John 1:51).' },
+  { name: 'Kiriath-jearim', lat: 31.806, lon: 35.103, clue: 'The ark of God stayed in this town for twenty years.', note: 'David later carried the ark from here to Jerusalem, dancing with all his might (2 Samuel 6:14).' },
+  { name: 'En-gedi', lat: 31.461, lon: 35.388, clue: 'A desert spring by the Dead Sea where David hid in caves from Saul.', note: 'David spared Saul here when he could have killed him. Mercy to an enemy points to Jesus (Luke 23:34).' },
+  { name: 'Beersheba', lat: 31.245, lon: 34.791, clue: 'The southern edge of Israel, at the far end from Dan.', note: 'Abraham, Isaac and Jacob all met God here in the desert.' },
+  { name: 'Arad', lat: 31.280, lon: 35.126, clue: 'A Canaanite king from this desert town attacked Israel in the wilderness.', note: 'Israel asked God for help, and he gave them the victory (Numbers 21:1–3).' },
+
+  // The lowlands and the Philistine coast
+  { name: 'Valley of Elah', lat: 31.695, lon: 34.960, clue: 'Where a shepherd boy faced a giant with a sling.', note: '“The battle is the LORD’s” (1 Samuel 17:47). Jesus fought the biggest battle of all for us.' },
+  { name: 'Beth-shemesh', lat: 31.751, lon: 34.976, clue: 'Two cows pulled the ark of God straight to this town.', note: 'The cows went straight on without turning aside (1 Samuel 6:12). God brought his presence home.' },
+  { name: 'Zorah', lat: 31.776, lon: 34.985, clue: 'An angel told Manoah’s wife here that she would have a very strong son.', note: 'Samson would “begin to deliver Israel” (Judges 13:5). Jesus came to finish the job and save his people (Matthew 1:21).' },
+  { name: 'Timnah', lat: 31.785, lon: 34.912, clue: 'On the way here Samson killed a lion, and later told a riddle about honey.', note: '“Out of the strong came forth sweetness” (Judges 14:14). God brings good things out of hard places.' },
+  { name: 'Lachish', lat: 31.565, lon: 34.849, clue: 'Sennacherib of Assyria camped here and sent threats to Hezekiah.', note: 'Hezekiah spread the letter before the LORD, and God answered (2 Kings 19:14–20).' },
+  { name: 'Gath', lat: 31.700, lon: 34.846, clue: 'Goliath’s hometown, where David later pretended to be mad.', note: 'David was afraid and alone here, and wrote, “I sought the LORD, and he heard me” (Psalm 34:4).' },
+  { name: 'Ekron', lat: 31.778, lon: 34.850, clue: 'A Philistine city whose people begged to send the ark of God away.', note: 'A king of Israel once sent to ask this city’s god about his illness. Elijah asked, “Is it not because there is not a God in Israel?” (2 Kings 1:3).' },
+  { name: 'Ashdod', lat: 31.756, lon: 34.663, clue: 'The Philistine idol Dagon fell on its face before the ark here.', note: 'No idol can stand before the true God. Philip later preached the gospel in this town, called Azotus (Acts 8:40).' },
+  { name: 'Ashkelon', lat: 31.663, lon: 34.547, clue: 'A Philistine seaport. David said, “publish it not in the streets” of this city.', note: 'David did not want Israel’s enemies to cheer over Saul’s death (2 Samuel 1:20). He grieved instead of gloating.' },
+  { name: 'Gaza', lat: 31.502, lon: 34.466, clue: 'Samson pulled down a temple here, and Philip met an Ethiopian on the road to it.', note: 'The Ethiopian official heard about Jesus from Isaiah 53 and was baptised on the spot (Acts 8).' },
+  { name: 'Joppa', lat: 32.054, lon: 34.752, clue: 'Jonah sailed from this port, and Peter saw a vision here.', note: 'From Joppa Jonah ran from God’s mercy for outsiders. In Joppa Peter learned that the gospel is for everyone (Acts 10).' },
+  { name: 'Lydda', lat: 31.951, lon: 34.889, clue: 'Peter healed Aeneas here after eight years in bed.', note: 'Peter said, “Aeneas, Jesus Christ maketh thee whole” (Acts 9:34). The healing power was Jesus’, not Peter’s.' },
+  { name: 'Antipatris', lat: 32.105, lon: 34.930, clue: 'Roman soldiers rushed Paul here by night to escape a plot to kill him.', note: 'Paul’s nephew overheard the plot (Acts 23:16). God used a young man to keep his messenger safe.' },
+  { name: 'Caesarea', lat: 32.500, lon: 34.892, clue: 'A Roman port where Peter met Cornelius and Paul was held.', note: 'The first non-Jewish family to receive the Holy Spirit lived here (Acts 10:44).' },
+
+  // Samaria and the central hills
+  { name: 'Shiloh', lat: 32.055, lon: 35.289, clue: 'The tabernacle stood here, and Hannah prayed for a son.', note: 'God heard Hannah here. He still hears quiet, desperate prayers.' },
+  { name: 'Shechem', lat: 32.213, lon: 35.282, clue: 'God first promised Abram the land here, and Joseph’s bones were buried here.', note: 'Nearby, at Jacob’s well, Jesus offered a thirsty woman living water (John 4:5–14).' },
+  { name: 'Mount Gerizim', lat: 32.200, lon: 35.272, clue: 'The Samaritan woman told Jesus her fathers worshipped on this mountain.', note: 'Jesus said true worship is not about a mountain but “in spirit and in truth” (John 4:24).' },
+  { name: 'Samaria', lat: 32.276, lon: 35.190, clue: 'Capital of the northern kingdom of Israel.', note: 'Jews and Samaritans avoided each other, but Jesus went straight through Samaria to meet a woman at a well (John 4).' },
+  { name: 'Tirzah', lat: 32.287, lon: 35.338, clue: 'A capital of the northern kingdom before King Omri built a new one.', note: 'Kings came and went fast in the north. Jesus is the King whose kingdom never ends (Luke 1:33).' },
+  { name: 'Dothan', lat: 32.414, lon: 35.240, clue: 'Joseph’s brothers sold him near here, and Elisha’s servant saw chariots of fire around it.', note: '“They that be with us are more than they that be with them” (2 Kings 6:16).' },
+
+  // The Jezreel Valley and Galilee
+  { name: 'Mount Carmel', lat: 32.670, lon: 35.080, clue: 'Elijah faced the prophets of Baal here.', note: 'Fire fell from heaven and the people cried, “The LORD, he is the God” (1 Kings 18:39).' },
+  { name: 'Megiddo', lat: 32.585, lon: 35.184, clue: 'A battlefield hill that gave its name to “Armageddon”.', note: 'Revelation says the last battle belongs to the Lamb, and he wins (Revelation 17:14).' },
+  { name: 'Jezreel', lat: 32.557, lon: 35.326, clue: 'King Ahab’s palace town, next to Naboth’s vineyard.', note: 'Ahab grabbed a poor man’s vineyard. Jesus, the true King, gave everything away for others (2 Corinthians 8:9).' },
+  { name: 'Spring of Harod', lat: 32.551, lon: 35.357, clue: 'Gideon camped by this spring, and God cut his army down to 300.', note: 'God made the army small so no one could boast (Judges 7:2). Salvation is his work, not ours.' },
+  { name: 'Mount Gilboa', lat: 32.470, lon: 35.420, clue: 'Saul and Jonathan died in battle on this mountain.', note: 'David wept, “How are the mighty fallen!” (2 Samuel 1:19). Even Israel’s first king needed a better King.' },
+  { name: 'Beth-shan', lat: 32.504, lon: 35.503, clue: 'The Philistines hung Saul’s body on this city’s wall.', note: 'Brave men from Jabesh-gilead walked all night to bring Saul’s body home (1 Samuel 31:12). Loyalty matters to God.' },
+  { name: 'Shunem', lat: 32.608, lon: 35.334, clue: 'A woman here built a little room on her roof for Elisha.', note: 'Elisha raised her son back to life (2 Kings 4:35). Jesus would later raise a widow’s son just a few kilometres away.' },
+  { name: 'Nain', lat: 32.631, lon: 35.348, clue: 'Jesus stopped a funeral here and raised a widow’s only son.', note: 'Jesus said, “Young man, I say unto thee, Arise” (Luke 7:14). Death has to obey him.' },
+  { name: 'Endor', lat: 32.646, lon: 35.369, clue: 'A desperate King Saul secretly visited a medium here.', note: 'Saul looked for answers in the wrong place. God invites us to come straight to him (Hebrews 4:16).' },
+  { name: 'Mount Tabor', lat: 32.687, lon: 35.390, clue: 'Barak gathered ten thousand men on this round mountain to fight Sisera.', note: 'Deborah told Barak, “Is not the LORD gone out before thee?” (Judges 4:14). God goes ahead of his people.' },
+  { name: 'Nazareth', lat: 32.700, lon: 35.297, clue: 'The small town where Jesus grew up.', note: '“Can there any good thing come out of Nazareth?” (John 1:46). God loves to work through places people overlook.' },
+  { name: 'Cana', lat: 32.746, lon: 35.339, clue: 'Where Jesus turned water into wine.', note: 'His first miracle saved a wedding and “manifested forth his glory” (John 2:11).' },
+  { name: 'Gath-hepher', lat: 32.741, lon: 35.326, clue: 'Hometown of the prophet Jonah, in Galilee.', note: 'Some said no prophet comes out of Galilee (John 7:52), but Jonah did. Jesus grew up just down the road in Nazareth.' },
+  { name: 'Ptolemais', lat: 32.923, lon: 35.069, clue: 'A port where Paul spent a day with the believers on his way to Jerusalem.', note: 'Everywhere Paul landed, there was already family in Christ waiting (Acts 21:7).' },
+  { name: 'Tiberias', lat: 32.794, lon: 35.531, clue: 'Herod’s lakeside city. The Sea of Galilee was also called by its name.', note: 'By the Sea of Tiberias the risen Jesus cooked breakfast for his disciples (John 21:1–13).' },
+  { name: 'Magdala', lat: 32.825, lon: 35.517, clue: 'The lakeside home of the first person to see Jesus risen.', note: 'Mary Magdalene heard Jesus say her name and ran to tell the others (John 20:16–18).' },
+  { name: 'Capernaum', lat: 32.881, lon: 35.575, clue: 'Jesus’ base by the Sea of Galilee, where he healed many.', note: 'Jesus healed a paralysed man here after his friends lowered him through the roof (Mark 2).' },
+  { name: 'Chorazin', lat: 32.911, lon: 35.564, clue: 'A Galilee town that saw Jesus’ miracles and still would not turn to God.', note: 'Jesus said, “Woe unto thee, Chorazin!” (Matthew 11:21). Seeing miracles is not the same as trusting him.' },
+  { name: 'Bethsaida', lat: 32.910, lon: 35.631, clue: 'Hometown of Philip, Andrew and Peter, on the north shore of the lake.', note: 'Near here Jesus healed a blind man with two touches until he saw everything clearly (Mark 8:22–25).' },
+  { name: 'Hazor', lat: 33.017, lon: 35.568, clue: 'The head of the northern Canaanite kingdoms, burned by Joshua.', note: 'Joshua won battles. Jesus, whose name is the Greek form of Joshua, won the battle against sin and death.' },
+  { name: 'Kedesh', lat: 33.111, lon: 35.531, clue: 'Barak’s hometown, and one of the six cities of refuge.', note: 'A city of refuge kept people safe. Hebrews says we have “fled for refuge” to the hope God gives us (Hebrews 6:18).' },
+
+  // The far north and the coast of Phoenicia
+  { name: 'Dan', lat: 33.249, lon: 35.652, clue: 'The northern edge of Israel, at the far end from Beersheba.', note: 'Jeroboam set up a golden calf here. God’s people kept chasing substitutes for him.' },
+  { name: 'Caesarea Philippi', lat: 33.248, lon: 35.694, clue: 'Near here Jesus asked, “Whom say ye that I am?”', note: 'Peter answered, “Thou art the Christ, the Son of the living God” (Matthew 16:16).' },
+  { name: 'Mount Hermon', lat: 33.416, lon: 35.857, clue: 'The tallest mountain in the land, with snow on top.', note: 'Psalm 133 compares God’s people living in unity to the dew of Hermon.' },
+  { name: 'Tyre', lat: 33.271, lon: 35.196, clue: 'A rich port city whose king sent cedar for Solomon’s temple.', note: 'Jesus healed the daughter of a woman from this region who would not give up asking (Mark 7).' },
+  { name: 'Zarephath', lat: 33.454, lon: 35.297, clue: 'A widow here shared her last meal with Elijah.', note: 'Her flour and oil never ran out (1 Kings 17:16). Jesus pointed to her to show God’s kindness reaches outsiders (Luke 4:26).' },
+  { name: 'Sidon', lat: 33.563, lon: 35.371, clue: 'An old Phoenician port city on the coast north of Tyre.', note: 'People from this coast travelled to hear Jesus and be healed (Luke 6:17). Good news travels.' },
+  { name: 'Damascus', lat: 33.511, lon: 36.296, clue: 'Saul met the risen Jesus on the road to this city.', note: 'Jesus turned the church’s fiercest enemy into its greatest messenger (Acts 9).' },
+
+  // The Jordan valley and across the Jordan
+  { name: 'Jericho', lat: 31.871, lon: 35.444, clue: 'Its walls fell down, and Zacchaeus climbed a tree here.', note: 'Centuries after the walls fell, Jesus came to Jericho to seek and save the lost (Luke 19:10).' },
+  { name: 'Mount Nebo', lat: 31.768, lon: 35.726, clue: 'Moses looked over the Promised Land from this mountain, then died.', note: 'Moses never entered the land, but centuries later he appeared with Jesus on the mountain of transfiguration (Matthew 17:3).' },
+  { name: 'Heshbon', lat: 31.802, lon: 35.809, clue: 'Sihon king of the Amorites ruled from this city before Israel took it.', note: 'Israel only asked to pass through peacefully (Numbers 21:22–25). God gave them the land he had promised.' },
+  { name: 'Rabbah', lat: 31.954, lon: 35.934, clue: 'The Ammonite capital, besieged while King David stayed home.', note: 'Uriah died fighting here because of David’s sin (2 Samuel 11). David’s story shows why we need a perfect King.' },
+];
