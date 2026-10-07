@@ -4,7 +4,13 @@
 (function () {
   const { h, shuffle, store } = BP;
   const ROUND = 10;
-  const PLAN = [1, 1, 1, 1, 2, 2, 2, 3, 3, 3]; // verse level for each question in a classic round
+  const PLAN = [1, 1, 1, 1, 1, 2, 2, 2, 3, 3]; // verse level for each question in a classic round
+  // The first few verses come from books everyone has heard of, and their wrong answers are small
+  // books from other parts of the Bible, so the right one stands out.
+  const WARMUP = 3;
+  const FAMOUS = ['Genesis', 'Exodus', 'Psalms', 'Proverbs', 'Isaiah', 'Matthew', 'Mark', 'Luke', 'John', 'Acts', 'Romans', 'Revelation'];
+  const SMALL = ['Obadiah', 'Nahum', 'Habakkuk', 'Zephaniah', 'Haggai', 'Micah', 'Joel', 'Lamentations', 'Leviticus', 'Numbers',
+    'Philemon', 'Jude', '2 John', '3 John', 'Titus', 'Colossians', '2 Thessalonians', 'Ezra', '2 Kings', '1 Chronicles'];
   // Sections of the Bible, by book index in BIBLE_BOOKS.
   const SECTIONS = [[0, 4], [5, 16], [17, 21], [22, 26], [27, 38], [39, 42], [43, 43], [44, 56], [57, 64], [65, 65]];
   const sectionOf = (i) => SECTIONS.findIndex(([a, b]) => i >= a && i <= b);
@@ -12,8 +18,13 @@
   const chapterOf = (ref) => +((/(\d+):\d/.exec(ref) || [])[1] || 0);
 
   // Three wrong books. "near" decoys come from the same section (or the one next to it).
-  function decoys(book, near) {
+  function decoys(book, near, easy) {
     const i = bookIndex(book), s = sectionOf(i);
+    if (easy) {
+      const base = (n) => n.replace(/^\d\s*/, ''); // "2 John" and "John" look alike, so never pair them
+      const far = shuffle(SMALL.filter((n) => bookIndex(n) >= 0 && sectionOf(bookIndex(n)) !== s && base(n) !== base(book)));
+      if (far.length >= 3) return far.slice(0, 3);
+    }
     const pool = BIBLE_BOOKS.filter((b) => b.name !== book);
     if (!near) return shuffle(pool).slice(0, 3).map((b) => b.name);
     const close = pool.filter((b) => Math.abs(sectionOf(b.i) - s) <= (sectionOf(b.i) === s ? 0 : 1));
@@ -56,9 +67,14 @@
         ask();
 
         function pickVerse() {
-          const level = streakMode ? (i < 4 ? 1 : i < 10 ? 2 : 3) : PLAN[i];
+          const level = streakMode ? (i < 6 ? 1 : i < 12 ? 2 : 3) : PLAN[i];
           const fresh = (l) => BOOK_VERSES.filter((v) => v.level === l && !used.has(v.ref));
           let pool = fresh(level);
+          if (i < WARMUP) {
+            const famous = BOOK_VERSES.filter((v) => v.level === 1 && FAMOUS.includes(v.book) && !history.includes(v));
+            const unseen = famous.filter((v) => !used.has(v.ref));
+            pool = unseen.length ? unseen : famous;
+          }
           if (!pool.length) pool = BOOK_VERSES.filter((v) => v.level === level && !history.includes(v));
           if (!pool.length) pool = BOOK_VERSES.filter((v) => !history.includes(v));
           const v = shuffle(pool)[0];
@@ -70,8 +86,8 @@
         function ask() {
           const v = pickVerse();
           const shownAt = Date.now();
-          const near = streakMode ? i >= 3 : i >= 4;
-          const options = shuffle([v.book, ...decoys(v.book, near)]);
+          const near = streakMode ? i >= 8 : i >= 6;
+          const options = shuffle([v.book, ...decoys(v.book, near, i < WARMUP)]);
           const feedback = h('div', { 'aria-live': 'polite' });
           const btns = options.map((name) => h('button', { class: 'btn opt', type: 'button', onclick: () => answer(name) }, h('span', { class: 'opt-text' }, name)));
           body.replaceChildren(

@@ -3,7 +3,8 @@
 (function () {
   const { h, shuffle, store } = BP;
   const ROUND = 10;
-  const PLAN = [1, 1, 1, 1, 2, 2, 2, 3, 3, 3]; // character level for each turn
+  const PLAN = [1, 1, 1, 1, 1, 2, 2, 2, 3, 3]; // character level for each turn
+  const WARMUP = 4; // early turns: plain lies and each character's best-known facts
   const BASE = 100, BONUS = 50, FULL_SECS = 3, ZERO_SECS = 20; // speed bonus: full up to 3s, gone by 20s
   const LETTERS = ['A', 'B', 'C'];
   const reduced = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -17,11 +18,13 @@
   function draw(c, turn) {
     const hardLies = c.lies.filter((l) => l.hard), easyLies = c.lies.filter((l) => !l.hard);
     let pool = c.lies;
-    if (turn < 3 && easyLies.length) pool = easyLies;
-    else if (turn >= 6 && hardLies.length) pool = hardLies;
+    if (turn < 6 && easyLies.length) pool = easyLies;
+    else if (turn >= 7 && hardLies.length) pool = hardLies;
     const lie = shuffle(pool)[0];
     const truths = [];
-    for (const t of shuffle(c.truths)) {
+    // Each character's truths are listed with the core story first, so warm-up turns use those.
+    const known = turn < WARMUP ? [...shuffle(c.truths.slice(0, 4)), ...shuffle(c.truths.slice(4))] : shuffle(c.truths);
+    for (const t of known) {
       if (truths.length === 2) break;
       if (t.k && (t.k === lie.k || truths.some((x) => x.k === t.k))) continue;
       truths.push(t);

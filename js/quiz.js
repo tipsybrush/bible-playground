@@ -8,8 +8,9 @@
     { id: 'all', label: 'Everything', blurb: 'The whole Bible, mixed up', filter: () => true },
   ];
   const LETTERS = ['A', 'B', 'C', 'D'];
-  // A round starts with a couple of warm-ups and finishes on harder questions.
-  const MIX = [[1, 2], [2, 4], [3, 3], [4, 1]];
+  // Meant to be friendly: almost every question is a well-known one, with a few slightly harder
+  // ones at the end, so anyone who knows the main Bible stories can get full marks.
+  const MIX = [[1, 8], [2, 2]];
   function pickRound(mode) {
     const pool = BIBLE_QUESTIONS.filter(mode.filter);
     const picked = [];
@@ -43,7 +44,7 @@
         body.replaceChildren(
           BP.howTo(
             h('li', null, 'Pick a round below: Old Testament, New Testament or everything.'),
-            h('li', null, 'Answer 10 questions. They start easy and finish tough.'),
+            h('li', null, 'Answer 10 questions about the best-known Bible stories.'),
             h('li', null, 'Each right answer is worth 100 points, and finishing fast earns a speed bonus.')),
           h('h2', { class: 'panel-title' }, 'Pick a round'),
           h('div', { class: 'choice-grid' }, MODES.map((m) =>
