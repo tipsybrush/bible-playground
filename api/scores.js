@@ -74,21 +74,20 @@ function clean(body) {
 // Same hash as playerId() in js/leaderboard.js; the raw id never leaves the player's browser otherwise.
 function playerId(pid) { return createHash('sha256').update('bp:' + pid).digest('hex').slice(0, 12); }
 
-// head() asks the Blob API itself, so it always knows the current version. The read that follows
-// names that version in its URL, so no cache along the way can hand back an older copy, or a
-// "not found" left over from before the file existed. (Plain reads sometimes came back empty, which
-// made saves fail as "busy" and the boards look blank.)
+// Reads the file the same way as before. If that read finds nothing, head() asks the Blob API
+// itself whether the file really is missing; if it isn't, the read was a hiccup, so try again
+// instead of treating the boards as empty (which made saves fail as "busy").
 async function load() {
   for (let tries = 0; ; tries++) {
-    let meta;
-    try { meta = await head(FILE); }
-    catch (e) { if (e instanceof BlobNotFoundError) return { boards: {}, etag: null }; throw e; }
-    const res = await get(`${meta.url}?v=${encodeURIComponent(meta.etag)}`, { access: 'private', useCache: false });
-    if (res && res.statusCode === 200 && (!res.blob.etag || res.blob.etag === meta.etag)) {
-      return { boards: JSON.parse(await new Response(res.stream).text()), etag: meta.etag };
+    const res = await get(FILE, { access: 'private', useCache: false });
+    if (res && res.statusCode === 200) {
+      return { boards: JSON.parse(await new Response(res.stream).text()), etag: res.blob.etag };
     }
-    if (tries >= 4) throw new Error('Could not read the leaderboards');
-    await new Promise((r) => setTimeout(r, 100 * (tries + 1)));
+    let missing = false;
+    try { await head(FILE); } catch (e) { missing = e instanceof BlobNotFoundError; }
+    if (missing) return { boards: {}, etag: null };
+    if (tries >= 4) throw new Error('The leaderboard file could not be read');
+    await new Promise((r) => setTimeout(r, 150 * (tries + 1)));
   }
 }
 
@@ -117,7 +116,7 @@ export async function GET(request) {
     return json({ boards: out }, 200, 'public, max-age=0, s-maxage=10, stale-while-revalidate=60');
   } catch (e) {
     console.error('scores GET', e && e.message);
-    return json({ error: 'Could not load the leaderboards' }, 500);
+    return json({ error: 'Could not load the leaderboards', detail: String((e && e.message) || e).slice(0, 200) }, 500);
   }
 }
 
