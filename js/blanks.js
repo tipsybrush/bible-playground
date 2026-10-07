@@ -49,6 +49,7 @@
         let target = gaps[0];
         let misses = 0;
         const started = Date.now();
+        const clockEl = BP.stopwatch(started);
 
         chips.forEach((c) => {
           c.el = h('button', { class: 'btn chip', onclick: () => tapChip(c) }, c.word);
@@ -108,6 +109,7 @@
           const idx = BIBLE_STORIES.indexOf(story);
           const nextStory = BIBLE_STORIES[(idx + 1) % BIBLE_STORIES.length];
           const seconds = Math.round((Date.now() - started) / 1000);
+          clockEl.stop();
           const points = Math.max(0, gaps.length * 100 - misses * 30 + Math.max(0, gaps.length * 20 - seconds));
           status.replaceChildren(h('div', { class: 'feedback good' },
             h('strong', null, 'You got every word!'),
@@ -121,7 +123,7 @@
         }
 
         body.replaceChildren(
-          h('div', { class: 'meta-row' }, h('span', { class: 'pill pill-game' }, story.title), h('span', null, story.ref + (story.kind === 'passage' ? ' (KJV)' : ''))),
+          h('div', { class: 'meta-row' }, h('span', { class: 'pill pill-game' }, story.title), h('span', null, story.ref + (story.kind === 'passage' ? ' (KJV)' : '')), clockEl),
           ...(story.note ? [h('p', { class: 'ref' }, story.note)] : []),
           textEl, bank,
           h('div', { class: 'btn-row' }, check, h('button', { class: 'btn btn-small', onclick: showList }, 'Pick another')),

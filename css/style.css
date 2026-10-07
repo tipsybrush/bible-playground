@@ -1599,3 +1599,7 @@ html:fullscreen, html:-webkit-full-screen { background: var(--sky-bottom); overf
 .foot-icon:hover, .foot-icon:focus-visible { background: var(--coin); color: #2A1B00; transform: translateY(-1px); }
 .foot-icon:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--edge); }
 .foot-links { gap: 10px 12px; }
+
+/* Running clock on timed games (BP.stopwatch) */
+.stopwatch { font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; font-variant-numeric: tabular-nums; min-width: 4.6em; text-align: center; background: var(--hud-bg); color: var(--hud-ink); }
+.word-meta { scroll-margin-top: 64px; }

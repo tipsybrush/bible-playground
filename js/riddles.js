@@ -93,7 +93,8 @@
           body.replaceChildren(
             h('div', { class: 'meta-row' },
               h('span', { class: 'pill pill-game' }, `Riddle ${i + 1} of ${set.length}`),
-              h('span', null, `Score ${score}`)),
+              h('span', null, `Score ${score}`),
+              BP.stopwatch(started)),
             clues, form,
             h('div', { class: 'btn-row' }, more, giveUp),
             feedback);

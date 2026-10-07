@@ -77,7 +77,8 @@
           body.replaceChildren(
             h('div', { class: 'meta-row' },
               h('span', { class: 'pill pill-game' }, streakMode ? `Streak ${right}` : `Verse ${i + 1} of ${ROUND}`),
-              h('span', null, `${score.toLocaleString('en-US')} pts`)),
+              h('span', null, `${score.toLocaleString('en-US')} pts`),
+              BP.stopwatch(started)),
             h('blockquote', { class: 'verse verse-big' }, v.text),
             h('p', { class: 'question' }, 'Which book is this from?'),
             h('div', { class: 'options' }, btns),

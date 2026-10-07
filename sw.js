@@ -20,6 +20,7 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url);
   const fonts = /fonts\.(googleapis|gstatic)\.com$/.test(url.hostname);
   if (url.origin !== location.origin && !fonts) return; // leaderboard API calls go straight to the network
+  if (url.pathname.startsWith('/api/')) return; // so does the site's own scores API
 
   if (req.mode === 'navigate') {
     e.respondWith(fetch(req)

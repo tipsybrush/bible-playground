@@ -62,6 +62,8 @@
         let current = '', over = false;
         if (daily && !saved.started) { saved.started = Date.now(); store.set('word-daily', saved); }
         const started = daily ? saved.started : Date.now();
+        const clockEl = BP.stopwatch(started, daily && saved.finished);
+        let meta;
 
         const grid = h('div', { class: 'word-grid', role: 'grid', 'aria-label': 'Your guesses' });
         const note = h('p', { class: 'word-note', 'aria-live': 'polite' });
@@ -73,13 +75,14 @@
         const after = h('div');
 
         body.replaceChildren(
-          h('div', { class: 'meta-row' },
+          meta = h('div', { class: 'meta-row word-meta' },
             h('span', { class: 'pill pill-game' }, daily ? 'Today’s word' : 'Practice'),
+            clockEl,
             h('button', { class: 'btn btn-small', onclick: () => { stopKeys(); menu(); } }, 'Back')),
           grid, note, kb, after);
         draw();
-        // On phones, bring the board up so it sits right above the keyboard.
-        if (matchMedia('(max-width: 600px)').matches) requestAnimationFrame(() => grid.scrollIntoView({ block: 'start', behavior: 'smooth' }));
+        // On phones, bring the clock and board up so they sit right above the keyboard.
+        if (matchMedia('(max-width: 600px)').matches) requestAnimationFrame(() => meta.scrollIntoView({ block: 'start', behavior: 'smooth' }));
         if (daily && saved.done) return reveal(saved.won, true);
 
         stopKeys();
@@ -126,6 +129,7 @@
           const tries = guesses.length;
           const secs = Math.round(((daily && saved.finished) || Date.now()) - started) / 1000 | 0;
           if (daily && !already) saved.finished = Date.now();
+          clockEl.stop(started + secs * 1000);
           const points = won ? (TRIES + 1 - tries) * 100 + Math.max(0, 180 - secs) : 0;
           if (daily && !already) {
             saved.done = true; saved.won = won; store.set('word-daily', saved);

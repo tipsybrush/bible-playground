@@ -86,6 +86,26 @@
     },
   };
 
+  // A running ⏱ clock for timed games, counting from `started` (a Date.now() stamp).
+  // It stops by itself once it leaves the page, or when .stop() is called at the end of a game.
+  BP.stopwatch = function (started, endedAt) {
+    const el = BP.h('span', { class: 'pill stopwatch', role: 'timer', 'aria-label': 'Time taken' });
+    let seen = false, timer = 0;
+    const show = (now) => {
+      const s = Math.max(0, Math.floor((now - started) / 1000));
+      el.textContent = `⏱ ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    };
+    el.stop = (at = Date.now()) => { clearInterval(timer); show(at); };
+    if (endedAt) { show(endedAt); return el; }
+    show(Date.now());
+    timer = setInterval(() => {
+      if (el.isConnected) seen = true;
+      else if (seen) { clearInterval(timer); return; }
+      show(Date.now());
+    }, 250);
+    return el;
+  };
+
   BP.gameHead = function (title, subtitle) {
     return BP.h('header', { class: 'game-head' }, BP.h('h1', null, title), BP.h('p', null, subtitle));
   };

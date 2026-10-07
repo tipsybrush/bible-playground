@@ -65,7 +65,8 @@
           body.replaceChildren(
             h('div', { class: 'meta-row' },
               h('span', { class: 'pill pill-game' }, `Question ${i + 1} of ${qs.length}`),
-              h('span', null, `Score ${score}`, streak >= 2 ? `  ·  ${streak} in a row!` : '')),
+              h('span', null, `Score ${score}`, streak >= 2 ? `  ·  ${streak} in a row!` : ''),
+              BP.stopwatch(started)),
             h('p', { class: 'question' }, q.q),
             h('div', { class: 'options' }, buttons),
             feedback);

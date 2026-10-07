@@ -7,6 +7,8 @@
 // Share and challenge links point here. Leave it empty to use the current page address.
 window.BP_CONFIG = {
   siteUrl: 'https://bible-playground.vercel.app/',
+  // The site's own shared leaderboards (api/scores.js on Vercel). Every player sees the same top 10.
+  scoresApi: '/api/scores',
   supabaseUrl: '',
   supabaseKey: '',
   // Your donation link (a Paystack payment page, Selar, Flutterwave, Patreon…). The footer "Support this site" button shows once this is set.

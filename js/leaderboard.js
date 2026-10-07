@@ -2,7 +2,8 @@
 // whose score makes the top 10 can choose to add a nickname.
 //
 // Where scores are kept, in order of preference:
-//   1. Supabase, when js/config.js has a project URL and key (the real, public site).
+//   1. The site's own /api/scores (Vercel), when js/config.js sets scoresApi: one board for everyone.
+//      (Supabase is still supported if supabaseUrl and supabaseKey are set instead.)
 //   2. The Claude artifact store, when the page is opened as a Claude preview.
 //   3. This browser only, as a fallback (for example when opening index.html from disk).
 (function () {
@@ -59,6 +60,32 @@
     };
   }
 
+  // The live site's own API. One request fetches every game's board; it is reused for a few seconds
+  // so the leaderboards page doesn't ask fourteen times.
+  function apiStore(url) {
+    let all = null, fetchedAt = 0;
+    const boards = () => {
+      if (!all || Date.now() - fetchedAt > 15000) {
+        fetchedAt = Date.now();
+        all = fetch(url).then((res) => { if (!res.ok) throw new Error('Could not load the leaderboard'); return res.json(); })
+          .then((d) => d.boards || {})
+          .catch((e) => { all = null; throw e; });
+      }
+      return all;
+    };
+    return {
+      shared: true,
+      async top(game) { return sortTop((await boards())[game] || []); },
+      async submit(game, entry) {
+        const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game, ...entry }) });
+        if (!res.ok) throw new Error('Could not save your score');
+        const { board } = await res.json();
+        if (all) all = all.then((b) => ({ ...b, [game]: board }));
+        return board;
+      },
+    };
+  }
+
   // Pick the backend once. The Claude preview answers asynchronously, so games wait on this promise.
   const ready = (async () => {
     const cfg = window.BP_CONFIG || {};
@@ -69,6 +96,7 @@
         if (db) return artifactStore(db);
       } catch (e) {}
     }
+    if (cfg.scoresApi && /^https?:$/.test(location.protocol)) return apiStore(cfg.scoresApi);
     return local;
   })();
 
@@ -134,12 +162,12 @@
           if (extra.boosted) entry.boost = true;
           if (BP.shop && BP.shop.has('crown')) entry.crown = true;
           try {
-            await backend.submit(game, entry);
+            const returned = await backend.submit(game, entry);
             store.set('nickname', name);
-            const fresh = await backend.top(game);
+            const fresh = Array.isArray(returned) ? sortTop(returned) : await backend.top(game);
             const mine = fresh.find((r) => r.at === entry.at && r.name === name) || null;
             box.replaceChildren(title, note, table(fresh, mine),
-              h('p', { class: 'done-mark' }, `Nice one, ${name}! You're on the board.`));
+              h('p', { class: 'done-mark' }, mine ? `Nice one, ${name}! You're on the board.` : 'Someone just beat that score a moment ago. Play again to climb back on!'));
           } catch (e2) {
             save.disabled = false; skip.disabled = false;
             err.textContent = 'Your name could not be saved. Check your connection and try again.';
