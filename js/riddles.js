@@ -5,6 +5,29 @@
   const ROUND = 8;
   const POINTS = [3, 2, 1]; // for solving on clue 1, 2 or 3
 
+  // Rounds start with answers almost everyone knows and finish on deep cuts:
+  // riddles 1-3 come from EASY, 4-6 from MEDIUM, 7-8 from everything else.
+  const EASY = new Set(['Jonah', 'Lazarus', 'Manna', 'Peter', 'The burning bush', 'Samson', 'Zacchaeus', 'The Tower of Babel',
+    'Esther', 'Goliath', 'The prodigal son', 'Elijah', 'Adam', 'Eve', 'Noah', 'Abraham', 'Isaac', 'Joseph (son of Jacob)', 'Moses',
+    'The Red Sea', 'The Ten Commandments', 'The golden calf', 'The walls of Jericho', 'Ruth', 'David', 'Solomon', 'Daniel',
+    'Shadrach, Meshach and Abed-nego', 'Mary, mother of Jesus', 'The shepherds', 'The star', 'John the Baptist', 'The cross',
+    'The empty tomb', 'Bethlehem', 'The Good Samaritan', 'The Last Supper', 'Paul', 'Pontius Pilate', 'The lost sheep',
+    'Thirty pieces of silver', 'Frogs', 'The Lord’s Prayer', 'The crown of thorns', 'Thomas']);
+  const MEDIUM = new Set(['Jacob', 'Sarah', 'Esau', 'Rachel', 'Aaron', 'Miriam', 'The Passover lamb', 'Mount Sinai', 'Joshua', 'Gideon',
+    'Deborah', 'Naomi', 'Boaz', 'Hannah', 'Samuel', 'Saul', 'Jonathan', 'Elisha', 'Naaman', 'Jezebel', 'Ahab', 'Isaiah', 'Jeremiah',
+    'Nebuchadnezzar', 'Mordecai', 'Haman', 'Nehemiah', 'Job', 'Nineveh', 'King Herod', 'Andrew', 'Matthew', 'John', 'James',
+    'Mary Magdalene', 'Martha', 'Barabbas', 'Nazareth', 'Gethsemane', 'The dove', 'The mustard seed', 'The widow’s mites',
+    'The Sermon on the Mount', 'The day of Pentecost', 'Stephen', 'Barnabas', 'Damascus', 'Rahab', 'Nicodemus', 'Lot',
+    'Moses’ staff', 'The ark of the covenant', 'Joseph, husband of Mary', 'Simon of Cyrene', 'Bartimaeus', 'Silas', 'Timothy',
+    'Caleb', 'The Jordan', 'Methuselah', 'The cock', 'Myrrh', 'Salt', 'Quails', 'Legion', 'Philip', 'Jesse', 'Eli', 'Absalom',
+    'Hezekiah', 'Belshazzar', 'Cornelius', 'Lydia', 'Patmos', 'The Mount of Olives', 'Ravens', 'The donkey', 'The fig tree',
+    'Ananias and Sapphira', 'Zacharias', 'Elisabeth']);
+  function pickRound() {
+    const tier = (r) => (EASY.has(r.answer) ? 0 : MEDIUM.has(r.answer) ? 1 : 2);
+    const of = (t) => BIBLE_RIDDLES.filter((r) => tier(r) === t);
+    return [...BP.fresh('riddles-easy', of(0), 3), ...BP.fresh('riddles-medium', of(1), 3), ...BP.fresh('riddles-hard', of(2), ROUND - 6)];
+  }
+
   const clean = (s) => s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '')
     .replace(/[‘’']/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\b(the|a|an)\b/g, ' ').replace(/\s+/g, ' ').trim();
 
@@ -40,14 +63,14 @@
       function intro() {
         body.replaceChildren(
           BP.howTo(
-            h('li', null, `You get ${ROUND} riddles about Bible people, places and things. Each starts with one cryptic clue.`),
+            h('li', null, `You get ${ROUND} riddles about Bible people, places and things. They start easy and get harder.`),
             h('li', null, 'Type your guess, or ask for the next clue. Spelling doesn’t have to be perfect.'),
             h('li', null, 'Solve on the first clue for 3 points, the second for 2 and the third for 1.')),
           h('div', { class: 'btn-row' }, h('button', { class: 'btn btn-primary', onclick: start }, 'Start')));
       }
 
       function start() {
-        const set = BP.fresh('riddles', BIBLE_RIDDLES, ROUND);
+        const set = pickRound();
         const started = Date.now();
         let i = 0, score = 0;
         ask();

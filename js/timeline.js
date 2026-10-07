@@ -1,17 +1,36 @@
 // Timeline Rush: drag Bible events into the order they happened before the clock runs out.
-// Level 1 has 5 events. Every level adds one more and draws them from a narrower stretch of the story.
+// It starts gently and gets harder one step at a time:
+//   levels 1-3: 3, 4, then 5 famous events, far apart, with extra time;
+//   level 4:    5 events from anywhere in the Bible, still spread out;
+//   level 5 on: one more event every level or two, from a narrower and narrower stretch of the story.
 (function () {
   const { h, shuffle, store } = BP;
-  const START = 5;
+  const SIZES = [3, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10];
+  const size = (level) => SIZES[Math.min(level, SIZES.length) - 1];
+  // Events most players already know (by their n in data/timeline.js).
+  const FAMOUS = new Set([10, 70, 90, 120, 140, 190, 210, 340, 490, 530, 630, 650, 690, 720, 780, 800, 950, 1010, 1130,
+    1280, 1390, 1500, 1520, 1610, 1670, 1750, 1930, 1970, 2040, 2150, 2200, 2230, 2250, 2300, 2330, 2430, 2480, 2500,
+    2530, 2570, 2630, 2690, 2710, 2820, 3120]);
 
-  // Pick n events. Early levels spread across the whole Bible; later ones come from a narrower window.
+  // Split the chosen stretch into n equal parts and take one event from each, so events are never
+  // bunched together. Early levels use famous events across the whole Bible; later ones a narrower window.
   function draw(n, level) {
-    const all = BIBLE_TIMELINE;
-    const span = Math.max(n * 3, Math.round(all.length * Math.max(0.22, 1 - (level - 1) * 0.16)));
-    const from = Math.floor(Math.random() * (all.length - span + 1));
-    return BP.fresh('timeline', all.slice(from, from + span), n);
+    const all = BIBLE_TIMELINE.slice().sort((a, b) => a.n - b.n);
+    let pool = all, key = 'timeline';
+    if (level <= 3) { pool = all.filter((e) => FAMOUS.has(e.n)); key = 'timeline-famous'; }
+    else if (level >= 5) {
+      const span = Math.max(n * 4, Math.round(all.length * Math.max(0.2, 1 - (level - 4) * 0.15)));
+      const from = Math.floor(Math.random() * (all.length - span + 1));
+      pool = all.slice(from, from + span);
+    }
+    const picked = [];
+    for (let i = 0; i < n; i++) {
+      const part = pool.slice(Math.floor((i * pool.length) / n), Math.floor(((i + 1) * pool.length) / n));
+      picked.push(...BP.fresh(key, part, 1));
+    }
+    return shuffle(picked);
   }
-  const seconds = (n) => 25 + n * 9;
+  const seconds = (n, level) => (level <= 3 ? 20 + n * 12 : 25 + n * 9);
 
   BP.games.timeline = {
     title: 'Timeline Rush',
@@ -31,10 +50,10 @@
         stop();
         body.replaceChildren(
                     BP.howTo(
-            h('li', null, 'You get five Bible events. Drag them so the earliest is at the top, or use the arrows.'),
+            h('li', null, 'You start with three well-known Bible events. Drag them so the earliest is at the top, or use the arrows.'),
             h('li', null, 'Press Lock it in before time runs out.'),
             h('li', { class: 'tl-kbd-hint' }, 'On a keyboard: ↑ ↓ to choose an event, Space to pick it up, ↑ ↓ to move it, Space to drop. Press C (or Enter) to lock it in.'),
-            h('li', null, 'Get them all right and the next level adds one more event, from a closer stretch of the story.'),
+            h('li', null, 'Get them all right to go up a level. Levels add events and get trickier as you go.'),
             h('li', null, 'One mistake and the run is over.')),
           h('div', { class: 'btn-row' }, h('button', { class: 'btn btn-primary', onclick: () => run() }, 'Start')));
       }
@@ -46,9 +65,9 @@
 
         function playLevel() {
           stop();
-          const n = START + level - 1;
+          const n = size(level);
           const events = draw(n, level);
-          let left = seconds(n), done = false;
+          let left = seconds(n, level), done = false;
           const list = h('ol', { class: 'tl-list', 'aria-label': 'Events, earliest first' });
           const timer = h('span', { class: 'charade-timer tl-timer' }, left);
           const lock = h('button', { class: 'btn btn-primary', onclick: () => check(false) }, 'Lock it in');
