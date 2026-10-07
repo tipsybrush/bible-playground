@@ -74,15 +74,72 @@
     if (!seen.includes(id)) { seen.push(id); BP.store.set('seen-' + key, seen); }
   };
 
-  // One nickname for the whole site. Typing it in any leaderboard or share box fills in every other
-  // nickname box straight away, and it's remembered for next time.
+  // One nickname for the whole site, used on every leaderboard and score picture. It is never blank:
+  // a player who doesn't pick one gets a fun random name, and can change it any time from the menu.
+  const NICK_ADJ = ['Brave', 'Bold', 'Swift', 'Mighty', 'Joyful', 'Wise', 'Kind', 'Steady', 'Bright', 'Humble', 'Fearless', 'Faithful', 'Valiant', 'Gentle', 'Zealous'];
+  const NICK_NAME = ['Gideon', 'Esther', 'Daniel', 'Ruth', 'Caleb', 'Deborah', 'Samuel', 'Miriam', 'Joshua', 'Hannah', 'Elijah', 'Lydia', 'Mary', 'Peter', 'Jonah', 'Naomi', 'David', 'Rahab', 'Silas', 'Tabitha', 'Boaz', 'Phoebe', 'Titus', 'Joseph', 'Abigail'];
+  const BLOCKED_ANYWHERE = ['fuck', 'shit', 'cunt', 'bitch', 'whore', 'slut', 'pussy', 'nigg', 'penis', 'vagina', 'retard', 'hitler', 'bastard', 'porn'];
+  const BLOCKED_WORDS = ['ass', 'arse', 'sex', 'dick', 'cock', 'fag', 'rape', 'nazi', 'damn', 'boob', 'boobs', 'tits', 'kill', 'satan', 'hell'];
   BP.nick = {
-    get: () => BP.store.get('nickname', ''),
-    set(value, from) {
-      const name = String(value || '').replace(/[^\p{L}\p{N} ]/gu, '').replace(/\s+/g, ' ').trimStart().slice(0, 16);
-      BP.store.set('nickname', name.trim());
-      document.querySelectorAll('input[id^="nick-"], input[id^="share-nick-"]').forEach((el) => { if (el !== from && el.value !== name) el.value = name; });
-      document.dispatchEvent(new CustomEvent('bp:nick', { detail: name.trim() }));
+    random() {
+      const pick = (a) => a[Math.floor(Math.random() * a.length)];
+      for (;;) {
+        const name = `${pick(NICK_ADJ)} ${pick(NICK_NAME)} ${10 + Math.floor(Math.random() * 90)}`;
+        if (name.length <= 16) return name;
+      }
+    },
+    // Returns { name } or { error } for a typed nickname.
+    check(raw) {
+      const name = String(raw || '').replace(/\s+/g, ' ').trim();
+      if (name.length < 2 || name.length > 16) return { error: 'Use 2 to 16 letters or numbers.' };
+      if (!/^[\p{L}\p{N} ._'-]+$/u.test(name)) return { error: 'Use letters, numbers and spaces only.' };
+      const plain = name.toLowerCase().replace(/0/g, 'o').replace(/1/g, 'i').replace(/3/g, 'e').replace(/[^a-z ]/g, '');
+      if (BLOCKED_ANYWHERE.some((w) => plain.replace(/ /g, '').includes(w)) || plain.split(' ').some((w) => BLOCKED_WORDS.includes(w))) {
+        return { error: 'Please pick a different nickname.' };
+      }
+      return { name };
+    },
+    get() {
+      let name = BP.store.get('nickname', '');
+      if (!BP.nick.check(name).name) { name = BP.nick.random(); BP.store.set('nickname', name); }
+      return name;
+    },
+    // Saves a checked name and updates every place it's shown.
+    set(value) {
+      const { name } = BP.nick.check(value);
+      if (!name) return false;
+      BP.store.set('nickname', name);
+      document.querySelectorAll('[data-nick]').forEach((el) => { el.textContent = name; });
+      document.dispatchEvent(new CustomEvent('bp:nick', { detail: name }));
+      return true;
+    },
+    // The nickname pop-up. first: shown on a first visit, where "Skip" keeps the random name.
+    prompt(first) {
+      if (document.querySelector('.nick-modal')) return;
+      const current = BP.nick.get();
+      const input = BP.h('input', { id: 'nick-modal-input', class: 'nick', type: 'text', maxlength: '16', autocomplete: 'nickname', value: first ? '' : current, placeholder: current });
+      const err = BP.h('p', { class: 'board-error', 'aria-live': 'polite' });
+      const close = () => { BP.store.set('nick-asked', true); scrim.remove(); document.removeEventListener('keydown', onKey, true); };
+      const save = (e) => {
+        e.preventDefault();
+        const typed = input.value.trim();
+        if (!typed && first) return close(); // keep the random name
+        if (!BP.nick.set(typed)) { err.textContent = BP.nick.check(typed).error; input.focus(); return; }
+        BP.sfx && BP.sfx('tap'); close();
+      };
+      const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); } };
+      const box = BP.h('form', { class: 'nick-modal panel', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'nick-modal-title', onsubmit: save },
+        BP.h('h2', { id: 'nick-modal-title', class: 'panel-title' }, first ? 'Welcome! What should we call you?' : 'Change your nickname'),
+        BP.h('p', null, 'Your nickname goes on the leaderboards when you get a top score. Use a nickname, not your full name.'),
+        BP.h('label', { for: 'nick-modal-input', class: 'nick-label' }, 'Nickname'),
+        input, err,
+        BP.h('div', { class: 'btn-row' },
+          BP.h('button', { class: 'btn btn-primary', type: 'submit' }, 'Save'),
+          BP.h('button', { class: 'btn', type: 'button', onclick: close }, first ? `Skip (be “${current}”)` : 'Cancel')));
+      const scrim = BP.h('div', { class: 'nick-scrim', onclick: (e) => { if (e.target === scrim) close(); } }, box);
+      document.body.append(scrim);
+      document.addEventListener('keydown', onKey, true);
+      setTimeout(() => input.focus(), 50);
     },
   };
 
@@ -186,7 +243,8 @@
   function watchFeedback() {
     document.addEventListener('click', (e) => {
       const b = e.target.closest && e.target.closest('button, a.btn');
-      if (!b || !document.getElementById('stage').contains(b)) return;
+      const stage = document.getElementById('stage');
+      if (!b || !stage || !stage.contains(b)) return;
       setTimeout(() => {
         if (b.classList.contains('is-correct')) { BP.sfx('coin'); BP.buzz(25); coinPop(b); }
         else if (b.classList.contains('is-wrong')) { BP.sfx('bad'); BP.buzz([60, 40, 60]); }
@@ -488,6 +546,11 @@
     window.addEventListener('hashchange', route);
     soundToggle(); watchFeedback(); keyboard(); edgeSwipe(); prefetchOnIntent(); offline();
     coffee(); menu(); fullscreen();
+    document.querySelectorAll('[data-nick]').forEach((el) => { el.textContent = BP.nick.get(); });
+    const nickBtn = document.getElementById('nick-change');
+    if (nickBtn) nickBtn.addEventListener('click', () => BP.nick.prompt(false));
     route().then(warmUp);
+    // First visit: offer to pick a nickname (skipping keeps a random one).
+    if (!BP.store.get('nick-asked', false)) setTimeout(() => { if (!BP.store.get('nick-asked', false)) BP.nick.prompt(true); }, 900);
   };
 })();

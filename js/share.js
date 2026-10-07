@@ -162,14 +162,16 @@
       if (o.points > ch.score) BP.challenge = null;
     }
 
+    // Leaderboard first: where this run ranks, saved automatically under the player's nickname.
+    if (board) out.append(BP.board.panel(game, o.points, o.detail, typeof o.secs === 'number' ? Math.round(o.secs) : undefined, { boosted: !!o.boosted }));
+
     if (o.share === false) return out;
 
     // Share box
     const canvas = h('canvas', { width: 1080, height: 1080, role: 'img', 'aria-label': 'Your score picture' });
-    const nick = h('input', { id: `share-nick-${game}`, class: 'nick', type: 'text', maxlength: '16', placeholder: 'Your nickname', value: store.get('nickname', '') });
     const note = h('p', { class: 'share-note', 'aria-live': 'polite' });
     const copyBox = h('p', { class: 'share-copy', hidden: true });
-    const name = () => nick.value.replace(/[^\p{L}\p{N} ]/gu, '').trim().slice(0, 16);
+    const name = () => BP.nick.get();
     const lvl = () => BP.player.level();
     const big = o.big || fmt(o.points, game);
     const draw = () => drawCard(canvas, {
@@ -177,9 +179,8 @@
       who: `${name() || 'A player'} · LV ${lvl().lv} ${lvl().title}`,
       cta: board ? 'CAN YOU BEAT ME?' : game === 'gifts' ? 'FIND YOUR PLACE!' : 'COME AND PLAY!',
     });
-    nick.addEventListener('input', () => { BP.nick.set(nick.value, nick); draw(); });
-    // Typed somewhere else (like the leaderboard box)? Redraw the picture with the new name.
-    const onNick = () => { if (!document.body.contains(nick)) return document.removeEventListener('bp:nick', onNick); if (document.activeElement !== nick) draw(); };
+    // Nickname changed? Redraw the picture with the new name.
+    const onNick = () => { if (!document.body.contains(canvas)) return document.removeEventListener('bp:nick', onNick); draw(); };
     document.addEventListener('bp:nick', onNick);
     draw();
 
@@ -193,8 +194,6 @@
       canvas,
       h('div', { class: 'share-main' },
         h('h3', null, board ? 'Brag about it!' : game === 'gifts' ? 'Share your gift' : 'Share it'),
-        h('label', { for: `share-nick-${game}`, class: 'nick-label' }, 'Nickname for your picture (optional)'),
-        nick,
         h('div', { class: 'btn-row' },
           h('button', { class: 'btn btn-primary', type: 'button', onclick: () => share({ title: 'Bible Playground', text: shareText(), url: link(game), canvas }, note, copyBox) }, board ? 'Share my score' : 'Share my result'),
           board
@@ -203,7 +202,6 @@
           h('button', { class: 'btn btn-small', type: 'button', onclick: () => savePicture(canvas, `bible-playground-${game}.png`, note) }, 'Save picture')),
         note, copyBox)));
 
-    if (board) out.append(BP.board.panel(game, o.points, o.detail, typeof o.secs === 'number' ? Math.round(o.secs) : undefined, { boosted: !!o.boosted }));
     return out;
   };
 })();

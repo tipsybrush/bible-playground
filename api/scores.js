@@ -1,12 +1,15 @@
 // Shared top-10 leaderboards for every player, kept as one small JSON file in Vercel Blob.
-//   GET  /api/scores          -> { boards: { quiz: [...], ladder: [...], ... } }
+//   GET  /api/scores            -> { boards: { quiz: [top 10], ladder: [...], ... } }
+//   GET  /api/scores?game=quiz  -> { board: [top 100] }  (so players outside the top 10 see their rank)
 //   POST /api/scores {game, name, score, detail, secs, boost, crown, at}
-//        -> { board: [...] }   (that game's fresh top 10, including the new entry if it made it)
+//        -> { board: [top 100], saved }
+// Each nickname keeps only its best run per game.
 // Writes use the file's ETag (ifMatch), so two players saving at once never wipe each other out.
 import { get, put, BlobPreconditionFailedError } from '@vercel/blob';
 
 const FILE = 'leaderboards/boards.json';
-const SIZE = 10;
+const SHOW = 10;
+const KEEP = 100;
 const GAMES = ['quiz', 'ladder', 'blanks', 'riddles', 'word', 'snake', 'timeline', 'ark', 'map', 'crossword', 'verse', 'trail', 'sling', 'truths'];
 
 // Same nickname filter as js/leaderboard.js, repeated here so it can't be skipped.
@@ -15,7 +18,11 @@ const BLOCKED_WORDS = ['ass', 'arse', 'sex', 'dick', 'cock', 'fag', 'rape', 'naz
 
 const secsOf = (r) => (typeof r.secs === 'number' ? r.secs : Infinity);
 const beats = (a, b) => b.score - a.score || secsOf(a) - secsOf(b) || a.at - b.at;
-const sortTop = (rows) => rows.slice().sort(beats).slice(0, SIZE);
+const sortTop = (rows, n = KEEP) => {
+  const best = new Map();
+  rows.slice().sort(beats).forEach((r) => { const k = String(r.name).toLowerCase(); if (!best.has(k)) best.set(k, r); });
+  return [...best.values()].slice(0, n);
+};
 
 function okName(raw) {
   const name = String(raw || '').replace(/\s+/g, ' ').trim();
@@ -56,11 +63,16 @@ async function save(boards, etag) {
 const json = (data, status = 200, cache = 'no-store') =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': cache } });
 
-export async function GET() {
+export async function GET(request) {
   try {
     const { boards } = await load();
+    const game = new URL(request.url).searchParams.get('game');
+    if (game) {
+      if (!GAMES.includes(game)) return json({ error: 'Unknown game' }, 400);
+      return json({ board: sortTop(boards[game] || []) }, 200, 'public, max-age=0, s-maxage=5, stale-while-revalidate=30');
+    }
     const out = {};
-    GAMES.forEach((g) => { out[g] = sortTop(boards[g] || []); });
+    GAMES.forEach((g) => { out[g] = sortTop(boards[g] || [], SHOW); });
     // The CDN answers repeat visits for a few seconds, so busy moments don't hit storage every time.
     return json({ boards: out }, 200, 'public, max-age=0, s-maxage=10, stale-while-revalidate=60');
   } catch (e) {

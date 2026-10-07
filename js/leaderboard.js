@@ -1,33 +1,38 @@
-// Optional top-10 leaderboards. Nobody has to sign up to play: after a game, a player
-// whose score makes the top 10 can choose to add a nickname.
+// Leaderboards. Nobody has to sign up: every player has a nickname (picked on their first visit,
+// or a fun random one), and a score good enough for the board is saved automatically under it.
+// Each nickname appears once per game, with its best run. Right after a game the player sees
+// where that run ranks.
 //
 // Where scores are kept, in order of preference:
-//   1. The site's own /api/scores (Vercel), when js/config.js sets scoresApi: one board for everyone.
-//      (Supabase is still supported if supabaseUrl and supabaseKey are set instead.)
+//   1. Supabase, if supabaseUrl and supabaseKey are set in js/config.js.
 //   2. The Claude artifact store, when the page is opened as a Claude preview.
-//   3. This browser only, as a fallback (for example when opening index.html from disk).
+//   3. The site's own /api/scores (Vercel), when js/config.js sets scoresApi: one board for everyone.
+//   4. This browser only, as a fallback (for example when opening index.html from disk).
 (function () {
   const { h, store } = BP;
-  const SIZE = 10;
-  // A light filter for nicknames. Words in the first list are blocked anywhere in a name;
-  // short words in the second only as whole words, so names like "Cassie" still work.
-  const BLOCKED_ANYWHERE = ['fuck', 'shit', 'cunt', 'bitch', 'whore', 'slut', 'pussy', 'nigg', 'penis', 'vagina', 'retard', 'hitler', 'bastard', 'porn'];
-  const BLOCKED_WORDS = ['ass', 'arse', 'sex', 'dick', 'cock', 'fag', 'rape', 'nazi', 'damn', 'boob', 'boobs', 'tits', 'kill', 'satan', 'hell'];
+  const SHOW = 10;  // rows shown on a board
+  const KEEP = 100; // rows kept per game, so players outside the top 10 can still see their rank
 
   // Higher score first; on equal scores the faster time ranks higher, then whoever got there first.
   const secsOf = (r) => (typeof r.secs === 'number' ? r.secs : Infinity);
   const beats = (a, b) => b.score - a.score || secsOf(a) - secsOf(b) || a.at - b.at;
   const clock = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  const same = (a, b) => String(a).toLowerCase() === String(b).toLowerCase();
 
-  function sortTop(rows) {
-    return rows.slice().sort(beats).slice(0, SIZE);
+  // Best run per nickname, best first.
+  function rank(rows, n = KEEP) {
+    const best = new Map();
+    rows.slice().sort(beats).forEach((r) => { const k = String(r.name).toLowerCase(); if (!best.has(k)) best.set(k, r); });
+    return [...best.values()].slice(0, n);
   }
 
   const local = {
     shared: false,
-    async top(game) { return sortTop(store.get('board-' + game, [])); },
+    async top(game) { return rank(store.get('board-' + game, [])); },
     async submit(game, entry) {
-      store.set('board-' + game, sortTop([...store.get('board-' + game, []), entry]));
+      const rows = rank([...store.get('board-' + game, []), entry]);
+      store.set('board-' + game, rows);
+      return rows;
     },
   };
 
@@ -36,8 +41,8 @@
     return {
       shared: true,
       async top(game) {
-        const snap = await col(game).orderBy('score', 'desc').limit(30).get();
-        return sortTop(snap.docs.map((d) => d.data()));
+        const snap = await col(game).orderBy('score', 'desc').limit(300).get();
+        return rank(snap.docs.map((d) => d.data()));
       },
       async submit(game, entry) { await col(game).add(entry); },
     };
@@ -49,9 +54,9 @@
     return {
       shared: true,
       async top(game) {
-        const res = await fetch(`${base}?game=eq.${encodeURIComponent(game)}&select=name,score,detail,secs,at,boost,crown&order=score.desc,secs.asc.nullslast,at.asc&limit=${SIZE}`, { headers });
+        const res = await fetch(`${base}?game=eq.${encodeURIComponent(game)}&select=name,score,detail,secs,at,boost,crown&order=score.desc,secs.asc.nullslast,at.asc&limit=300`, { headers });
         if (!res.ok) throw new Error('Could not load the leaderboard');
-        return sortTop(await res.json());
+        return rank(await res.json());
       },
       async submit(game, entry) {
         const res = await fetch(base, { method: 'POST', headers: { ...headers, Prefer: 'return=minimal' }, body: JSON.stringify({ game, ...entry }) });
@@ -60,28 +65,30 @@
     };
   }
 
-  // The live site's own API. One request fetches every game's board; it is reused for a few seconds
-  // so the leaderboards page doesn't ask fourteen times.
+  // The live site's own API. The leaderboards page fetches every game's top 10 in one request;
+  // the end-of-game panel fetches that game's full board (up to 100) to work out the player's rank.
   function apiStore(url) {
     let all = null, fetchedAt = 0;
+    const get = (q) => fetch(url + q).then((res) => { if (!res.ok) throw new Error('Could not load the leaderboard'); return res.json(); });
     const boards = () => {
       if (!all || Date.now() - fetchedAt > 15000) {
         fetchedAt = Date.now();
-        all = fetch(url).then((res) => { if (!res.ok) throw new Error('Could not load the leaderboard'); return res.json(); })
-          .then((d) => d.boards || {})
-          .catch((e) => { all = null; throw e; });
+        all = get('').then((d) => d.boards || {}).catch((e) => { all = null; throw e; });
       }
       return all;
     };
     return {
       shared: true,
-      async top(game) { return sortTop((await boards())[game] || []); },
+      async top(game, full) {
+        if (full) return rank((await get('?game=' + encodeURIComponent(game))).board || []);
+        return rank((await boards())[game] || []);
+      },
       async submit(game, entry) {
         const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game, ...entry }) });
         if (!res.ok) throw new Error('Could not save your score');
         const { board } = await res.json();
-        if (all) all = all.then((b) => ({ ...b, [game]: board }));
-        return board;
+        if (all) all = all.then((b) => ({ ...b, [game]: board.slice(0, SHOW) }));
+        return rank(board);
       },
     };
   }
@@ -100,83 +107,92 @@
     return local;
   })();
 
-  function cleanName(raw) {
-    const name = raw.replace(/\s+/g, ' ').trim();
-    if (name.length < 2 || name.length > 16) return { error: 'Use 2 to 16 letters or numbers.' };
-    if (!/^[\p{L}\p{N} ._'-]+$/u.test(name)) return { error: 'Use letters, numbers and spaces only.' };
-    const plain = name.toLowerCase().replace(/0/g, 'o').replace(/1/g, 'i').replace(/3/g, 'e').replace(/[^a-z ]/g, '');
-    const squashed = plain.replace(/ /g, '');
-    if (BLOCKED_ANYWHERE.some((w) => squashed.includes(w)) || plain.split(' ').some((w) => BLOCKED_WORDS.includes(w))) {
-      return { error: 'Please pick a different nickname.' };
-    }
-    return { name };
+  function row(r, n, me) {
+    return h('li', { class: me ? 'me' : '' },
+      h('span', { class: 'board-rank' }, n + 1),
+      h('span', { class: 'board-name' }, r.crown ? '👑 ' : '', r.name, me ? h('span', { class: 'board-you' }, 'YOU') : ''),
+      h('span', { class: 'board-detail' }, [r.detail, typeof r.secs === 'number' ? '⏱ ' + clock(r.secs) : '', r.boost ? '⚡ power-up' : ''].filter(Boolean).join(' · ')),
+      h('span', { class: 'board-score' }, r.score.toLocaleString('en-US')));
   }
 
-  function table(rows, highlight) {
+  // Top 10, plus the player's own row underneath if they're further down.
+  function table(rows, mine) {
     if (!rows.length) return h('p', { class: 'board-empty' }, 'No scores yet. Be the first!');
-    return h('ol', { class: 'board-list' }, rows.map((r, n) =>
-      h('li', { class: r === highlight ? 'me' : '' },
-        h('span', { class: 'board-rank' }, n + 1),
-        h('span', { class: 'board-name' }, r.crown ? '👑 ' : '', r.name),
-        h('span', { class: 'board-detail' }, [r.detail, typeof r.secs === 'number' ? '⏱ ' + clock(r.secs) : '', r.boost ? '⚡ power-up' : ''].filter(Boolean).join(' · ')),
-        h('span', { class: 'board-score' }, r.score.toLocaleString('en-US')))));
+    const at = mine ? rows.indexOf(mine) : -1;
+    const list = h('ol', { class: 'board-list' }, rows.slice(0, SHOW).map((r, n) => row(r, n, n === at)));
+    if (at >= SHOW) list.append(h('li', { class: 'board-gap', 'aria-hidden': 'true' }, '⋯'), row(mine, at, true));
+    return list;
   }
 
   function whereNote(backend) {
-    return backend.shared ? 'Top 10 for everyone playing.' : 'Top 10 on this device. Scores are shared once the site is online.';
+    return backend.shared ? 'Everyone playing shares this board.' : 'Scores on this device. They’re shared once the site is online.';
+  }
+
+  const ordinal = (n) => { const s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
+
+  // "Playing as Amara · Change": the nickname line shown with each board.
+  function playingAs() {
+    return h('p', { class: 'board-as' }, 'Playing as ', h('b', { 'data-nick': '' }, BP.nick.get()), ' · ',
+      h('button', { class: 'linkish', type: 'button', onclick: () => BP.nick.prompt(false) }, 'Change name'));
   }
 
   BP.board = {
     ready,
 
-    // Shown at the end of a game. score: number (higher is better); detail: short text like "8/10";
+    // Shown first at the end of a game. score: number (higher is better); detail: short text like "8/10";
     // secs: how long the game took (faster ranks higher on equal scores).
     panel(game, score, detail, secs, extra = {}) {
-      const box = h('div', { class: 'lboard' }, h('p', { class: 'ref' }, 'Checking the leaderboard…'));
+      const title = BP.games[game] ? BP.games[game].title : 'This game';
+      const body = h('div', { class: 'lboard-body' }, h('p', { class: 'ref' }, 'Checking the leaderboard…'));
+      const box = h('section', { class: 'lboard', 'aria-live': 'polite' },
+        h('h3', { class: 'board-title' }, '🏆 ', `${title} leaderboard`), body);
+
       (async () => {
         let backend, rows;
-        try { backend = await ready; rows = await backend.top(game); }
-        catch (e) { box.replaceChildren(h('p', { class: 'ref' }, 'The leaderboard is not available right now.')); return; }
-        const me = { score, secs: typeof secs === 'number' ? secs : undefined, at: Date.now() };
-        const makesIt = score > 0 && (rows.length < SIZE || beats(me, rows[rows.length - 1]) < 0);
-        const title = h('h3', { class: 'board-title' }, 'Leaderboard');
-        const note = h('p', { class: 'ref' }, whereNote(backend));
-        if (!makesIt) {
-          const need = rows.length >= SIZE ? rows[rows.length - 1].score + 1 : 1;
-          box.replaceChildren(title, note, table(rows),
-            h('p', { class: 'board-hint' }, `Score ${need.toLocaleString('en-US')} or more to get on the board.`));
-          return;
-        }
-        const input = h('input', { id: `nick-${game}`, class: 'nick', type: 'text', maxlength: '16', autocomplete: 'nickname', placeholder: 'Your nickname', value: store.get('nickname', '') });
-        input.addEventListener('input', () => BP.nick.set(input.value, input));
-        const err = h('p', { class: 'board-error', 'aria-live': 'polite' });
-        const save = h('button', { class: 'btn btn-primary', type: 'submit' }, 'Add my name');
-        const skip = h('button', { class: 'btn', type: 'button', onclick: () => box.replaceChildren(title, note, table(rows)) }, 'No thanks');
-        const form = h('form', { class: 'nick-form', onsubmit: async (e) => {
-          e.preventDefault();
-          const { name, error } = cleanName(input.value);
-          if (error) { err.textContent = error; input.focus(); return; }
-          save.disabled = true; skip.disabled = true; err.textContent = '';
-          const entry = { name, score, detail: detail || '', at: Date.now() };
-          if (typeof secs === 'number') entry.secs = secs;
-          if (extra.boosted) entry.boost = true;
-          if (BP.shop && BP.shop.has('crown')) entry.crown = true;
+        try { backend = await ready; rows = await backend.top(game, true); }
+        catch (e) { body.replaceChildren(h('p', { class: 'ref' }, 'The leaderboard is not available right now.')); return; }
+
+        const name = BP.nick.get();
+        const entry = { name, score, detail: detail || '', at: Date.now() };
+        if (typeof secs === 'number') entry.secs = secs;
+        if (extra.boosted) entry.boost = true;
+        if (BP.shop && BP.shop.has('crown')) entry.crown = true;
+
+        const old = rows.find((r) => same(r.name, name));
+        const others = rows.filter((r) => r !== old);
+        const place = others.filter((r) => beats(r, entry) < 0).length + 1; // where this run lands
+        const better = score > 0 && (!old || beats(entry, old) < 0);
+        const fits = place <= KEEP || others.length < KEEP;
+
+        let mine = old || null, saved = false;
+        if (better && fits) {
           try {
-            const returned = await backend.submit(game, entry);
-            store.set('nickname', name);
-            const fresh = Array.isArray(returned) ? sortTop(returned) : await backend.top(game);
-            const mine = fresh.find((r) => r.at === entry.at && r.name === name) || null;
-            box.replaceChildren(title, note, table(fresh, mine),
-              h('p', { class: 'done-mark' }, mine ? `Nice one, ${name}! You're on the board.` : 'Someone just beat that score a moment ago. Play again to climb back on!'));
-          } catch (e2) {
-            save.disabled = false; skip.disabled = false;
-            err.textContent = 'Your name could not be saved. Check your connection and try again.';
+            rows = await backend.submit(game, entry) || rank([...others, entry]);
+            mine = rows.find((r) => same(r.name, name) && r.at === entry.at) || rows.find((r) => same(r.name, name)) || null;
+            saved = true;
+          } catch (e) {
+            body.replaceChildren(h('p', { class: 'board-error' }, 'Your score could not be saved. Check your connection and play again.'), playingAs(), table(rows, old));
+            return;
           }
-        } },
-          h('label', { for: `nick-${game}`, class: 'nick-label' }, 'Want your name on the board? It’s up to you.'),
-          h('div', { class: 'btn-row' }, input, save, skip), err,
-          h('p', { class: 'ref' }, 'Use a nickname, not your full name.'));
-        box.replaceChildren(h('h3', { class: 'board-title' }, 'You made the top 10!'), note, table(rows), form);
+        }
+        const myRank = mine ? rows.indexOf(mine) + 1 : 0;
+
+        let banner;
+        if (saved && myRank) {
+          banner = h('div', { class: 'board-banner' + (myRank <= 3 ? ' top3' : '') },
+            h('span', { class: 'board-place' }, `#${myRank}`),
+            h('span', null, myRank === 1 ? `You’re number one on ${title}!` : myRank <= SHOW ? `You’re ${ordinal(myRank)} on the ${title} leaderboard!` : `You’re ${ordinal(myRank)} on ${title}. Keep climbing to reach the top 10!`));
+          if (myRank <= 3) BP.confetti();
+        } else if (score <= 0) {
+          banner = h('div', { class: 'board-banner low' }, h('span', null, 'Score some points to get on the board.'));
+        } else if (old) {
+          banner = h('div', { class: 'board-banner low' },
+            h('span', { class: 'board-place' }, `#${myRank}`),
+            h('span', null, `This run would be ${ordinal(place)}. Your best (${old.score.toLocaleString('en-US')}) still has you ${ordinal(myRank)}.`));
+        } else {
+          banner = h('div', { class: 'board-banner low' }, h('span', null, `Not in the top ${KEEP} yet. Score ${(rows[SHOW - 1] || rows[rows.length - 1]).score.toLocaleString('en-US')} or more to reach the top 10.`));
+        }
+        body.replaceChildren(banner, table(rows, mine), playingAs(), h('p', { class: 'ref' }, whereNote(backend)));
       })();
       return box;
     },
@@ -187,7 +203,8 @@
       const games = ['quiz', 'ladder', 'blanks', 'riddles', 'word', 'snake', 'timeline', 'ark', 'map', 'crossword', 'verse', 'trail', 'sling', 'truths'];
       const note = h('p', { class: 'ref' });
       const grid = h('div', { class: 'boards-grid' });
-      root.append(BP.gameHead('Leaderboards', 'The top 10 for each game. Every game rewards speed, and on equal scores the faster time ranks higher.'), note, grid);
+      root.append(BP.gameHead('Leaderboards', 'The top 10 for each game. Every game rewards speed, and on equal scores the faster time ranks higher.'), playingAs(), note, grid);
+      const me = BP.nick.get();
       games.forEach((g) => {
         const game = BP.games[g];
         const slot = h('div', null, h('p', { class: 'ref' }, 'Loading…'));
@@ -195,7 +212,7 @@
           h('div', { class: 'meta-row' }, h('h2', { class: 'panel-title' }, game.title), h('a', { class: 'btn btn-small', href: '#' + g }, 'Play')),
           h('p', { class: 'ref' }, game.scoring), slot));
         ready.then((b) => { note.textContent = whereNote(b); return b.top(g); })
-          .then((rows) => slot.replaceChildren(table(rows)))
+          .then((rows) => slot.replaceChildren(table(rows.slice(0, SHOW), rows.slice(0, SHOW).find((r) => same(r.name, me)))))
           .catch(() => slot.replaceChildren(h('p', { class: 'ref' }, 'Not available right now.')));
       });
     },
