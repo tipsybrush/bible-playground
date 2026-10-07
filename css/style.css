@@ -1651,3 +1651,28 @@ html:fullscreen, html:-webkit-full-screen { background: var(--sky-bottom); overf
 /* Overall leaderboard: full width at the top of the leaderboards page */
 .board-overall { margin: 14px 0 22px; border-top: 10px solid var(--coin); }
 .board-overall .panel-title { font-size: clamp(1.4rem, 5vw, 2rem); }
+
+/* "How to play?" card: retro pixel panel (BP.howTo). Fixed colours so it reads the same in dark mode. */
+.howto { position: relative; overflow: hidden; margin: 0 0 18px; padding: 18px 20px 22px; background: #FFE066; color: #1A1B3A; border: var(--block) solid #1A1B3A; box-shadow: 6px 6px 0 #1A1B3A; }
+.howto .px { display: inline-block; line-height: 0; }
+.howto .px svg { width: 100%; height: auto; display: block; }
+.howto-top { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; }
+.howto-hearts, .howto-coins { display: flex; gap: 6px; }
+.howto-hearts .px, .howto-coins .px { width: 26px; }
+.howto-cloud { position: absolute; z-index: 0; opacity: .95; }
+.howto-cloud.c1 { width: 120px; top: 44px; right: 26%; }
+.howto-cloud.c2 { width: 80px; bottom: 10px; left: 38%; opacity: .7; }
+.howto-bible { position: absolute; z-index: 0; right: 18px; bottom: 16px; width: 88px; height: 88px; image-rendering: pixelated; filter: drop-shadow(4px 4px 0 #1A1B3A); }
+.howto-title { position: relative; z-index: 1; margin: 14px 0 14px; font-family: 'Pixelify Sans', var(--font-display); font-weight: 700; font-size: clamp(2rem, 8vw, 3.4rem); line-height: .95; letter-spacing: .02em; text-transform: uppercase; color: #1A1B3A; max-width: 9ch; }
+.howto-steps { position: relative; z-index: 1; counter-reset: step; list-style: none; margin: 0; padding: 0 110px 0 0; display: grid; gap: 14px 28px; }
+@media (min-width: 760px) { .howto-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.howto-steps li { counter-increment: step; position: relative; min-height: 38px; padding: 6px 0 0 52px; font-weight: 700; line-height: 1.45; }
+.howto-steps li::before { content: counter(step); position: absolute; left: 0; top: 0; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: #1A1B3A; color: #FFE066; font-family: 'Pixelify Sans', var(--font-display); font-size: 1.25rem; }
+.howto-steps strong { color: #1A1B3A; }
+@media (max-width: 600px) {
+  .howto { padding: 14px 14px 18px; }
+  .howto-steps { padding-right: 0; }
+  .howto-bible { width: 56px; height: 56px; top: 54px; bottom: auto; right: 14px; }
+  .howto-cloud.c1 { width: 84px; top: 40px; right: 30%; }
+  .howto-cloud.c2 { display: none; }
+}

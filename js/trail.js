@@ -181,8 +181,7 @@
         const n = found().length;
         body.replaceChildren(
           h('div', { class: 'trail-mapbox' }, map.el),
-          h('h2', { class: 'panel-title' }, 'How to play'),
-          h('ul', { class: 'how-list' },
+                    BP.howTo(
             h('li', null, 'Follow the cloud from Rameses in Egypt, through the Red Sea and Sinai, all the way to Canaan.'),
             h('li', null, 'Watch your four supplies: manna, water, morale and faith. If any of them hits zero, the journey ends early.'),
             h('li', null, 'At every stop something happens. Pick a choice (tap it, or press 1, 2 or 3). Results are never quite the same twice.'),

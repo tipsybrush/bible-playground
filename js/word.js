@@ -41,8 +41,7 @@
         const d = store.get('word-daily', null);
         const doneToday = d && d.date === today() && d.done;
         body.replaceChildren(
-          h('h2', { class: 'panel-title' }, 'How it works'),
-          h('ul', { class: 'how-list' },
+                    BP.howTo(
             h('li', null, 'Type any 5-letter word and press Enter.'),
             h('li', null, h('span', { class: 'tile-key hit' }, 'G'), ' green means the letter is in the right spot.'),
             h('li', null, h('span', { class: 'tile-key near' }, 'O'), ' gold means it’s in the word, but somewhere else.'),

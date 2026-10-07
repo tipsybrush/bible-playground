@@ -37,8 +37,7 @@
       function intro() {
         stop();
         body.replaceChildren(
-          h('h2', { class: 'panel-title' }, 'How to play'),
-          h('ul', { class: 'how-list' },
+                    BP.howTo(
             h('li', null, 'Animals keep arriving. Tap two that match, or drag one onto its partner.'),
             h('li', null, 'Each pair walks onto the ark and pushes the water back down.'),
             h('li', null, 'A wrong match makes the water jump up. If the yard fills up, it rises faster.'),

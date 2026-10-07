@@ -39,8 +39,10 @@
 
       function intro() {
         body.replaceChildren(
-          h('h2', { class: 'panel-title' }, 'How it works'),
-          h('p', null, `You get ${ROUND} riddles. Each starts with one cryptic clue. Type your guess, or ask for the next clue. Solve on the first clue for 3 points, the second for 2 and the third for 1. Spelling doesn’t have to be perfect.`),
+          BP.howTo(
+            h('li', null, `You get ${ROUND} riddles about Bible people, places and things. Each starts with one cryptic clue.`),
+            h('li', null, 'Type your guess, or ask for the next clue. Spelling doesn’t have to be perfect.'),
+            h('li', null, 'Solve on the first clue for 3 points, the second for 2 and the third for 1.')),
           h('div', { class: 'btn-row' }, h('button', { class: 'btn btn-primary', onclick: start }, 'Start')));
       }
 

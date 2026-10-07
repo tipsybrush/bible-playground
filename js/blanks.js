@@ -23,6 +23,10 @@
             h('span', { class: 'choice-label' }, s.title),
             h('span', { class: 'choice-blurb' }, s.ref, done.includes(s.id) ? h('span', { class: 'done-mark' }, '  ·  Done') : null))));
         body.replaceChildren(
+          BP.howTo(
+            h('li', null, 'Pick a Scripture passage or a Bible story below.'),
+            h('li', null, 'Tap a word in the word bank to drop it into the highlighted gap. Tap any gap to choose it, or to take its word back. Watch out for decoys that almost fit.'),
+            h('li', null, 'Press Check my answers. Fewer wrong guesses and a faster finish mean more points.')),
           h('h2', { class: 'panel-title' }, 'Scripture passages'),
           h('p', { class: 'ref' }, 'Word for word from the King James Version. Watch out for decoys that almost fit.'),
           list('passage'),

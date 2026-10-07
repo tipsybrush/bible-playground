@@ -114,8 +114,7 @@
           onclick: () => { size = k; store.set('xword-size', k); btns.forEach((b, i) => b.setAttribute('aria-pressed', String(Object.keys(SIZES)[i] === k))); },
         }, s.label));
         body.replaceChildren(
-          h('h2', { class: 'panel-title' }, 'How it works'),
-          h('ul', { class: 'how-list' },
+                    BP.howTo(
             h('li', null, 'Tap a square, then type. Tap the same square again to switch between across and down.'),
             h('li', null, `Each word is worth ${WORD_POINTS} points. Stuck? A hint gives you the first letter and where to find it in the Bible, but halves that word’s points.`),
             h('li', null, `Still stuck ${REVEAL_AFTER} seconds after a hint? You can reveal the whole word, but it scores nothing.`),

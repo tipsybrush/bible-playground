@@ -163,6 +163,34 @@
     return el;
   };
 
+  // "How to play?" card: a retro pixel panel (hearts, coins, clouds and a pixel Bible) with numbered
+  // steps. Pass the steps as h('li', …) items. The headline uses the pixel font; steps stay readable.
+  const PIX = {
+    heart: ['.kk.kk.', 'krrkrrk', 'krwrrrk', 'krrrrrk', '.krrrk.', '..krk..', '...k...'],
+    coin: ['..kkk..', '.kyyyk.', 'kyywyyk', 'kyywyyk', 'kyywyyk', '.kyyyk.', '..kkk..'],
+    cloud: ['.....kkkk.........', '....kwwwwk..kkk....', '..kkwwwwwwkkwwwk...', '.kwwwwwwwwwwwwwwk..', 'kwwwwbwwwwwwbwwwwk.', 'kwwwbbbwwwwwbbwwwwk', '.kkkkkkkkkkkkkkkkk.'],
+  };
+  const PIX_COL = { k: '#1A1B3A', r: '#E03131', w: '#FFFFFF', y: '#FCC419', b: '#A5D8FF' };
+  function pixel(name, cls) {
+    const rows = PIX[name], w = Math.max(...rows.map((r) => r.length));
+    let rects = '';
+    rows.forEach((row, y) => [...row].forEach((c, x) => { if (PIX_COL[c]) rects += `<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${PIX_COL[c]}"/>`; }));
+    const span = BP.h('span', { class: 'px ' + (cls || ''), 'aria-hidden': 'true' });
+    span.innerHTML = `<svg viewBox="0 0 ${w} ${rows.length}" shape-rendering="crispEdges">${rects}</svg>`;
+    return span;
+  }
+  BP.howTo = function (...steps) {
+    const title = typeof steps[0] === 'string' ? steps.shift() : 'How to play?';
+    return BP.h('section', { class: 'howto' },
+      BP.h('div', { class: 'howto-top' },
+        BP.h('span', { class: 'howto-hearts' }, pixel('heart'), pixel('heart'), pixel('heart')),
+        BP.h('span', { class: 'howto-coins' }, pixel('coin'), pixel('coin'), pixel('coin'))),
+      pixel('cloud', 'howto-cloud c1'), pixel('cloud', 'howto-cloud c2'),
+      BP.h('img', { class: 'howto-bible', src: 'icons/favicon.svg', alt: '', width: '96', height: '96' }),
+      BP.h('h2', { class: 'howto-title' }, title),
+      BP.h('ol', { class: 'howto-steps' }, steps));
+  };
+
   BP.gameHead = function (title, subtitle) {
     return BP.h('header', { class: 'game-head' }, BP.h('h1', null, title), BP.h('p', null, subtitle));
   };

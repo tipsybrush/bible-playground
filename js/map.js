@@ -59,8 +59,7 @@
       function intro() {
         stop();
         body.replaceChildren(
-          h('h2', { class: 'panel-title' }, 'How to play'),
-          h('ul', { class: 'how-list' },
+                    BP.howTo(
             h('li', null, `You get ${ROUND} places from the Bible, with a clue for each.`),
             h('li', null, `Tap where you think it is. You have ${SECONDS} seconds for each one.`),
             h('li', null, 'Up to 1,000 points each. Right on top of it scores the most.'),

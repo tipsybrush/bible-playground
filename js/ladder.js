@@ -50,12 +50,12 @@
       function intro() {
         drawRungs(-1);
         main.replaceChildren(
-          h('h2', { class: 'panel-title' }, 'How to climb'),
-          h('p', null, 'Each right answer moves you one rung up the ladder. The ladder has three zones, and every safe rung you pass unlocks a harder zone. The final zone ends with expert questions. One wrong answer and you drop back to your last safe rung, so you can stop and keep your money any time.'),
-          h('p', null, 'You get three lifelines, one use each: ',
-            h('strong', null, '50:50'), ' removes two wrong answers, ',
-            h('strong', null, 'Ask the Youth Group'), ' shows how a crowd would vote, and ',
-            h('strong', null, 'Hint'), ' tells you where in the Bible to look.'),
+          BP.howTo(
+            h('li', null, 'Each right answer moves you one rung up the ladder, all the way to 1,000,000 points.'),
+            h('li', null, 'Every safe rung you pass unlocks a harder zone. The final zone ends with expert questions.'),
+            h('li', null, 'One wrong answer drops you back to your last safe rung, so you can stop and keep your points any time.'),
+            h('li', null, 'Three lifelines, one use each: ', h('strong', null, '50:50'), ' removes two wrong answers, ',
+              h('strong', null, 'Ask the Youth Group'), ' shows how a crowd would vote, and ', h('strong', null, 'Hint'), ' tells you where to look.')),
           h('p', { class: 'ref' }, 'In Genesis 28:12, Jacob dreamed of a ladder reaching up to heaven.'),
           h('div', { class: 'btn-row' }, h('button', { class: 'btn btn-primary', onclick: begin }, 'Start climbing')));
       }

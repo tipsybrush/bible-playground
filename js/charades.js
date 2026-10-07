@@ -53,8 +53,7 @@
         releaseWake();
         Object.keys(tally).forEach((k) => delete tally[k]);
         body.replaceChildren(
-          h('h2', { class: 'panel-title' }, 'Set up a game'),
-          h('ol', { class: 'how-list' },
+                    BP.howTo('How to set up',
             h('li', null, 'The guesser holds the phone up facing the group, so they can’t see the screen.'),
             h('li', null, 'The group acts out the card without speaking.'),
             h('li', null, 'On a phone, tilt the screen ', h('strong', null, 'down'), ' when you get it, or ', h('strong', null, 'up'), ' to pass. You can also tap ', h('strong', null, 'Got it'), ' or ', h('strong', null, 'Pass'), '.'),

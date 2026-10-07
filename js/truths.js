@@ -59,8 +59,7 @@
               h('span', { class: 'truths-demo-card is-true' }, 'TRUE'),
               h('span', { class: 'truths-demo-card is-lie' }, 'LIE'),
               h('span', { class: 'truths-demo-card is-true' }, 'TRUE')),
-            h('h2', { class: 'panel-title' }, 'How it works'),
-            h('ul', { class: 'how-list' },
+                        BP.howTo(
               h('li', null, `${ROUND} Bible characters and stories, from Sunday-school favourites to deeper cuts.`),
               h('li', null, 'Each one gets three statements. Two are true. One is a lie, often a mix-up many of us grew up hearing.'),
               h('li', null, `Tap the lie (or press 1, 2, 3). ${BASE} points if you catch it, up to ${BONUS} more for speed.`),

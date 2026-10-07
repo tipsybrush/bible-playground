@@ -53,8 +53,7 @@
           onclick: () => { mode = k; store.set('snake-mode', k); btns.forEach((b, n) => b.setAttribute('aria-pressed', String(Object.keys(MODES)[n] === k))); },
         }, m.label));
         body.replaceChildren(
-          h('h2', { class: 'panel-title' }, 'How to play'),
-          h('ul', { class: 'how-list' },
+                    BP.howTo(
             h('li', null, 'The next book you need is shown above the board. Books glow in the colour of their part of the Bible.'),
             h('li', null, 'Steer with the arrow keys, by swiping on the board, or with the buttons underneath.'),
             h('li', null, 'Some books on the board are decoys. Eat the wrong one and you lose a life.'),

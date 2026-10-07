@@ -150,8 +150,7 @@
       function menu() {
         cleanup();
         body.replaceChildren(
-          h('h2', { class: 'panel-title' }, 'How to play'),
-          h('ul', { class: 'how-list' },
+                    BP.howTo(
             h('li', null, 'You see the valley through David’s eyes. Press on the field, pull the sling down and aim the circle, then let go to throw.'),
             h('li', null, 'Keyboard: the arrow keys aim. Hold Space to pull the sling back, let go to throw.'),
             h('li', null, 'Five smooth stones (1 Samuel 17:40), each at a farther target. The last one is for Goliath: hit his forehead!'),

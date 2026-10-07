@@ -30,8 +30,7 @@
       function intro() {
         stop();
         body.replaceChildren(
-          h('h2', { class: 'panel-title' }, 'How it works'),
-          h('ul', { class: 'how-list' },
+                    BP.howTo(
             h('li', null, 'You get five Bible events. Drag them so the earliest is at the top, or use the arrows.'),
             h('li', null, 'Press Lock it in before time runs out.'),
             h('li', { class: 'tl-kbd-hint' }, 'On a keyboard: ↑ ↓ to choose an event, Space to pick it up, ↑ ↓ to move it, Space to drop. Press C (or Enter) to lock it in.'),

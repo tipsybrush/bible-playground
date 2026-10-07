@@ -41,6 +41,10 @@
 
       function showPicker() {
         body.replaceChildren(
+          BP.howTo(
+            h('li', null, 'Pick a round below: Old Testament, New Testament or everything.'),
+            h('li', null, 'Answer 10 questions. They start easy and finish tough.'),
+            h('li', null, 'Each right answer is worth 100 points, and finishing fast earns a speed bonus.')),
           h('h2', { class: 'panel-title' }, 'Pick a round'),
           h('div', { class: 'choice-grid' }, MODES.map((m) =>
             h('button', { class: 'btn choice', onclick: () => start(m) },

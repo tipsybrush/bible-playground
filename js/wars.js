@@ -177,8 +177,7 @@
         });
         refresh();
         show(
-          h('h2', { class: 'panel-title' }, 'Set up the war'),
-          h('ol', { class: 'how-list' },
+                    BP.howTo('How to set up',
             h('li', null, 'Split into teams. Tick 2 to 6 church departments and rename them if you like. Not on the list? Add your own team below.'),
             h('li', null, 'Teams take turns. Each turn is a surprise mini round: quiz, riddle, charades, timeline and more.'),
             h('li', null, 'The host reads out, keeps time, reveals and marks. The host’s word is final!'),
