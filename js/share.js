@@ -139,6 +139,29 @@
     },
   };
 
+  // "Play next": two other games, favouring ones this player hasn't tried yet, so they don't have to
+  // go back to the world map. Uses the same cards (and cover art) as the home page.
+  const PARTY = ['charades', 'wars']; // group games, not a natural "next" for one player
+  function playNext(game) {
+    const played = new Set(store.get('played', []));
+    played.add(game); store.set('played', [...played]);
+    const cards = [...document.querySelectorAll('#home .shelf a.card')]
+      .map((el) => ({ el, id: (el.getAttribute('href') || '').slice(1) }))
+      .filter((c) => c.id && c.id !== game && !PARTY.includes(c.id));
+    if (cards.length < 2) return null;
+    const shuffled = cards.sort(() => Math.random() - 0.5);
+    const fresh = shuffled.filter((c) => !played.has(c.id));
+    const picks = [...fresh, ...shuffled.filter((c) => played.has(c.id))].slice(0, 2);
+    return h('section', { class: 'play-next' },
+      h('h3', null, 'Play next'),
+      h('div', { class: 'play-next-grid' }, picks.map((c) => {
+        const card = c.el.cloneNode(true);
+        card.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
+        card.classList.add('card-next');
+        return card;
+      })));
+  }
+
   // Called once at the end of every game. Pays out coins and shows the share and leaderboard boxes.
   // o: { points, detail, secs, coins, board (default true), share (default true), kicker, big, sub, shareText() }
   BP.finish = function (game, o) {
@@ -165,7 +188,8 @@
     // Leaderboard first: where this run ranks, saved automatically under the player's nickname.
     if (board) out.append(BP.board.panel(game, o.points, o.detail, typeof o.secs === 'number' ? Math.round(o.secs) : undefined, { boosted: !!o.boosted }));
 
-    if (o.share === false) return out;
+    const next = playNext(game);
+    if (o.share === false) { if (next) out.append(next); return out; }
 
     // Share box
     const canvas = h('canvas', { width: 1080, height: 1080, role: 'img', 'aria-label': 'Your score picture' });
@@ -202,6 +226,7 @@
           h('button', { class: 'btn btn-small', type: 'button', onclick: () => savePicture(canvas, `bible-playground-${game}.png`, note) }, 'Save picture')),
         note, copyBox)));
 
+    if (next) out.append(next);
     return out;
   };
 })();

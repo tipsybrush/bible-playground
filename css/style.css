@@ -1635,3 +1635,15 @@ html:fullscreen, html:-webkit-full-screen { background: var(--sky-bottom); overf
 .board-as { margin: 0; color: var(--muted); }
 .board-as b { color: var(--ink); }
 .linkish { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--game); text-decoration: underline; cursor: pointer; }
+
+/* "Play next" suggestions at the end of every game */
+.play-next h3 { margin: 0 0 10px; font-size: 1.4rem; }
+.play-next-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; max-width: 720px; }
+.play-next .card-next { text-decoration: none; }
+.play-next .card-next .card-art { aspect-ratio: 16 / 10; }
+@media (max-width: 600px) {
+  .play-next-grid { gap: 10px; }
+  .play-next .card-next .card-text { display: none; }
+  .play-next .card-next .card-title { font-size: 1rem; }
+  .play-next .card-next .world-tag { font-size: .5rem; }
+}
