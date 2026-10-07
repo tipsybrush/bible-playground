@@ -1647,3 +1647,7 @@ html:fullscreen, html:-webkit-full-screen { background: var(--sky-bottom); overf
   .play-next .card-next .card-title { font-size: 1rem; }
   .play-next .card-next .world-tag { font-size: .5rem; }
 }
+
+/* Overall leaderboard: full width at the top of the leaderboards page */
+.board-overall { margin: 14px 0 22px; border-top: 10px solid var(--coin); }
+.board-overall .panel-title { font-size: clamp(1.4rem, 5vw, 2rem); }

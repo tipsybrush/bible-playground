@@ -1,6 +1,7 @@
 // Shared top-10 leaderboards for every player, kept as one small JSON file in Vercel Blob.
 //   GET  /api/scores            -> { boards: { quiz: [top 10], ladder: [...], ... } }
 //   GET  /api/scores?game=quiz  -> { board: [top 100] }  (so players outside the top 10 see their rank)
+//   GET  /api/scores?overall=1  -> { overall: [top 100 across all games] }
 //   POST /api/scores {game, name, score, detail, secs, boost, crown, at}
 //        -> { board: [top 100], saved }
 // Each nickname keeps only its best run per game.
@@ -23,6 +24,25 @@ const sortTop = (rows, n = KEEP) => {
   rows.slice().sort(beats).forEach((r) => { const k = String(r.name).toLowerCase(); if (!best.has(k)) best.set(k, r); });
   return [...best.values()].slice(0, n);
 };
+
+// Overall leaderboard: in each game a player earns up to 1000 points, in proportion to the game's
+// top score (the leader gets 1000, half the leader's score gets 500). Adding these up keeps games
+// with huge scores, like Jacob's Ladder, from outweighing the rest, and rewards playing many games.
+function overall(boards, n = KEEP) {
+  const acc = new Map();
+  GAMES.forEach((g) => {
+    const rows = sortTop(boards[g] || []);
+    const top = rows.length ? rows[0].score : 0;
+    if (top <= 0) return;
+    rows.forEach((r) => {
+      const k = String(r.name).toLowerCase();
+      const a = acc.get(k) || { name: r.name, points: 0, games: 0, crown: false };
+      a.points += Math.round((1000 * r.score) / top); a.games++; a.crown = a.crown || !!r.crown;
+      acc.set(k, a);
+    });
+  });
+  return [...acc.values()].sort((a, b) => b.points - a.points || b.games - a.games).slice(0, n);
+}
 
 function okName(raw) {
   const name = String(raw || '').replace(/\s+/g, ' ').trim();
@@ -66,7 +86,9 @@ const json = (data, status = 200, cache = 'no-store') =>
 export async function GET(request) {
   try {
     const { boards } = await load();
-    const game = new URL(request.url).searchParams.get('game');
+    const params = new URL(request.url).searchParams;
+    if (params.get('overall')) return json({ overall: overall(boards) }, 200, 'public, max-age=0, s-maxage=10, stale-while-revalidate=60');
+    const game = params.get('game');
     if (game) {
       if (!GAMES.includes(game)) return json({ error: 'Unknown game' }, 400);
       return json({ board: sortTop(boards[game] || []) }, 200, 'public, max-age=0, s-maxage=5, stale-while-revalidate=30');

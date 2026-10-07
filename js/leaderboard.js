@@ -26,6 +26,32 @@
     return [...best.values()].slice(0, n);
   }
 
+  const GAMES = ['quiz', 'ladder', 'blanks', 'riddles', 'word', 'snake', 'timeline', 'ark', 'map', 'crossword', 'verse', 'trail', 'sling', 'truths'];
+
+  // Overall leaderboard (same rule as api/scores.js): up to 1000 points per game, in proportion to
+  // that game's top score, added up across every game.
+  function combine(boards) {
+    const acc = new Map();
+    GAMES.forEach((g) => {
+      const rows = rank(boards[g] || []);
+      const top = rows.length ? rows[0].score : 0;
+      if (top <= 0) return;
+      rows.forEach((r) => {
+        const k = String(r.name).toLowerCase();
+        const a = acc.get(k) || { name: r.name, points: 0, games: 0, crown: false };
+        a.points += Math.round((1000 * r.score) / top); a.games++; a.crown = a.crown || !!r.crown;
+        acc.set(k, a);
+      });
+    });
+    return [...acc.values()].sort((a, b) => b.points - a.points || b.games - a.games).slice(0, KEEP);
+  }
+  // Backends without their own overall view work it out from each game's board.
+  async function overallFrom(backend) {
+    const boards = {};
+    await Promise.all(GAMES.map(async (g) => { boards[g] = await backend.top(g, true); }));
+    return combine(boards);
+  }
+
   const local = {
     shared: false,
     async top(game) { return rank(store.get('board-' + game, [])); },
@@ -83,6 +109,7 @@
         if (full) return rank((await get('?game=' + encodeURIComponent(game))).board || []);
         return rank((await boards())[game] || []);
       },
+      async overall() { return (await get('?overall=1')).overall || []; },
       async submit(game, entry) {
         const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game, ...entry }) });
         if (!res.ok) throw new Error('Could not save your score');
@@ -197,15 +224,32 @@
       return box;
     },
 
-    // The leaderboards page: one table per game.
+    // The leaderboards page: the overall board first, then one table per game.
     page(root) {
       root.style.setProperty('--game', 'var(--c-quiz)');
-      const games = ['quiz', 'ladder', 'blanks', 'riddles', 'word', 'snake', 'timeline', 'ark', 'map', 'crossword', 'verse', 'trail', 'sling', 'truths'];
       const note = h('p', { class: 'ref' });
       const grid = h('div', { class: 'boards-grid' });
-      root.append(BP.gameHead('Leaderboards', 'The top 10 for each game. Every game rewards speed, and on equal scores the faster time ranks higher.'), playingAs(), note, grid);
+      const overallSlot = h('div', null, h('p', { class: 'ref' }, 'Loading…'));
       const me = BP.nick.get();
-      games.forEach((g) => {
+      root.append(BP.gameHead('Leaderboards', 'Who’s the best across every game, and the top 10 for each one. Speed counts: on equal scores the faster time ranks higher.'), playingAs(), note,
+        h('section', { class: 'panel board-card board-overall' },
+          h('h2', { class: 'panel-title' }, '👑 Overall champions'),
+          h('p', { class: 'ref' }, 'In each game you earn up to 1,000 points: the leader gets 1,000 and everyone else gets a share in line with their best score. Your points from every game are added up, so playing more games helps.'),
+          overallSlot),
+        grid);
+      ready.then((b) => (b.overall ? b.overall() : overallFrom(b))).then((rows) => {
+        const at = rows.findIndex((r) => same(r.name, me));
+        const line = (r, n) => h('li', { class: n === at ? 'me' : '' },
+          h('span', { class: 'board-rank' }, n + 1),
+          h('span', { class: 'board-name' }, r.crown ? '👑 ' : '', r.name, n === at ? h('span', { class: 'board-you' }, 'YOU') : ''),
+          h('span', { class: 'board-detail' }, `${r.games} game${r.games === 1 ? '' : 's'}`),
+          h('span', { class: 'board-score' }, r.points.toLocaleString('en-US')));
+        if (!rows.length) { overallSlot.replaceChildren(h('p', { class: 'board-empty' }, 'No scores yet. Play any game to get on the board!')); return; }
+        const list = h('ol', { class: 'board-list' }, rows.slice(0, SHOW).map(line));
+        if (at >= SHOW) list.append(h('li', { class: 'board-gap', 'aria-hidden': 'true' }, '⋯'), line(rows[at], at));
+        overallSlot.replaceChildren(list, at < 0 ? h('p', { class: 'board-hint' }, 'Play any game to join the overall board.') : '');
+      }).catch(() => overallSlot.replaceChildren(h('p', { class: 'ref' }, 'Not available right now.')));
+      GAMES.forEach((g) => {
         const game = BP.games[g];
         const slot = h('div', null, h('p', { class: 'ref' }, 'Loading…'));
         grid.append(h('section', { class: 'panel board-card', style: `--game:${game.color}` },
