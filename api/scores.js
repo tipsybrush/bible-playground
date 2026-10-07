@@ -91,6 +91,29 @@ async function load() {
   }
 }
 
+// Temporary check of how the storage answers (no scores or secrets in the output). It rewrites
+// the file with its own unchanged content to see which version tag a conditional save accepts.
+async function diag() {
+  const out = {};
+  const step = async (k, fn) => { try { out[k] = await fn(); } catch (e) { out[k] = { error: (e && e.constructor && e.constructor.name) + ': ' + String(e && e.message).slice(0, 160) }; } };
+  let text = null, getEtag = null, headEtag = null;
+  await step('head', async () => { const m = await head(FILE); headEtag = m.etag; return { etag: m.etag, size: m.size }; });
+  await step('get', async () => {
+    const r = await get(FILE, { access: 'private', useCache: false });
+    if (!r) return null;
+    text = await new Response(r.stream).text(); getEtag = r.blob.etag;
+    return { status: r.statusCode, etag: r.blob.etag, bytes: text.length };
+  });
+  if (text != null) {
+    const opts = { access: 'private', contentType: 'application/json', addRandomSuffix: false, cacheControlMaxAge: 60 };
+    await step('putWithGetEtag', async () => { const r = await put(FILE, text, { ...opts, ifMatch: getEtag }); return { ok: true, etag: r.etag }; });
+    await step('head2', async () => (await head(FILE)).etag);
+    const fresh = out.head2;
+    if (typeof fresh === 'string') await step('putWithHeadEtag', async () => { const r = await put(FILE, text, { ...opts, ifMatch: fresh }); return { ok: true, etag: r.etag }; });
+  }
+  return out;
+}
+
 async function save(boards, etag) {
   const opts = { access: 'private', contentType: 'application/json', addRandomSuffix: false, cacheControlMaxAge: 60 };
   if (etag) opts.ifMatch = etag;
@@ -102,8 +125,9 @@ const json = (data, status = 200, cache = 'no-store') =>
 
 export async function GET(request) {
   try {
-    const { boards } = await load();
     const params = new URL(request.url).searchParams;
+    if (params.get('diag')) return json(await diag(), 200);
+    const { boards } = await load();
     if (params.get('overall')) return json({ overall: overall(boards) }, 200, 'public, max-age=0, s-maxage=10, stale-while-revalidate=60');
     const game = params.get('game');
     if (game) {
