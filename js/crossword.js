@@ -3,7 +3,8 @@
 (function () {
   const { h, store } = BP;
   const SIZES = { mini: { n: 7, words: 7, label: 'Mini 7×7' }, big: { n: 9, words: 10, label: 'Big 9×9' } };
-  const HINT_COST = 100;
+  const WORD_POINTS = 150; // each word: full points, half after a hint, none if the answer is revealed
+  const REVEAL_AFTER = 20; // seconds after a hint before the Reveal button appears
   const ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
 
   // Small seeded random generator, so a seed always builds the same puzzle.
@@ -89,7 +90,7 @@
   BP.games.crossword = {
     title: 'Bible Crossword',
     color: 'var(--c-crossword)',
-    scoring: '150 points per word, minus 100 per hint, plus a speed bonus.',
+    scoring: '150 points per word (75 with a hint, 0 if revealed), plus a speed bonus.',
     badge() {
       const d = store.get('xword-daily', null);
       if (d && d.date === today() && d.done) return 'Today: solved';
@@ -116,7 +117,8 @@
           h('h2', { class: 'panel-title' }, 'How it works'),
           h('ul', { class: 'how-list' },
             h('li', null, 'Tap a square, then type. Tap the same square again to switch between across and down.'),
-            h('li', null, `Stuck? A hint reveals one letter for ${HINT_COST} points.`),
+            h('li', null, `Each word is worth ${WORD_POINTS} points. Stuck? A hint gives you the first letter and where to find it in the Bible, but halves that word’s points.`),
+            h('li', null, `Still stuck ${REVEAL_AFTER} seconds after a hint? You can reveal the whole word, but it scores nothing.`),
             h('li', null, 'Today’s puzzle is the same for everyone. Practice puzzles are new every time.')),
           h('div', { class: 'size-row' }, h('span', { class: 'ref' }, 'Practice size:'), btns),
           h('div', { class: 'btn-row' },
@@ -134,9 +136,10 @@
         const N = puzzle.size;
 
         let saved = daily ? store.get('xword-daily', null) : null;
-        if (!saved || saved.date !== today()) saved = { date: today(), letters: {}, hints: 0, secs: 0, done: false };
+        if (!saved || saved.date !== today() || !saved.help) saved = { date: today(), letters: {}, help: {}, hintAt: {}, secs: 0, done: false };
         const letters = daily ? { ...saved.letters } : {};
-        let hints = daily ? saved.hints : 0, secs = daily ? saved.secs : 0, done = false;
+        const help = daily ? { ...saved.help } : {}, hintAt = daily ? { ...saved.hintAt } : {}; // word index -> 'hint' | 'reveal'
+        let secs = daily ? saved.secs : 0, done = false;
         let active = puzzle.words[0], pos = 0, revealed = new Set(daily ? saved.revealed || [] : []);
 
         const cellEls = {};
@@ -153,8 +156,8 @@
         const nextBtn = h('button', { class: 'btn btn-small', type: 'button', 'aria-label': 'Next clue', onclick: () => jump(1) }, '▶');
         const clueText = h('p', { class: 'xw-clue', 'aria-live': 'polite' });
         clueBar.append(prevBtn, clueText, nextBtn);
-        const timerEl = h('span', null, '0:00');
-        const hintBtn = h('button', { class: 'btn btn-small', type: 'button', onclick: hint }, `Hint (−${HINT_COST})`);
+        const timerEl = h('span', { class: 'pill stopwatch', role: 'timer', 'aria-label': 'Time taken' }, '⏱ 0:00');
+        const helpRow = h('div', { class: 'xw-help', 'aria-live': 'polite' });
         const checkBtn = h('button', { class: 'btn btn-small', type: 'button', onclick: check }, 'Check');
         const note = h('p', { class: 'word-note', 'aria-live': 'polite' });
         const kb = h('div', { class: 'word-kb' }, ROWS.map((row, i) => h('div', { class: 'word-kb-row' },
@@ -166,14 +169,15 @@
         body.replaceChildren(
           h('div', { class: 'meta-row' },
             h('span', { class: 'pill pill-game' }, daily ? 'Today’s puzzle' : `Practice · ${sz.label}`),
-            timerEl, hintBtn, checkBtn,
+            timerEl, checkBtn,
             h('button', { class: 'btn btn-small', onclick: () => { stopKeys(); clearInterval(tick); menu(); } }, 'Back')),
-          clueBar, grid, note, kb, lists, after);
+          clueBar, helpRow, grid, note, kb, lists, after);
 
         const tick = setInterval(() => {
           if (!document.body.contains(grid)) return clearInterval(tick);
           if (done || document.hidden) return;
-          secs++; timerEl.textContent = clock(secs);
+          secs++; timerEl.textContent = '⏱ ' + clock(secs);
+          if (help[idx(active)] === 'hint') drawHelp();
           if (daily && secs % 5 === 0) persist();
         }, 1000);
         keyHandler = (e) => {
@@ -191,14 +195,18 @@
           }
         };
         document.addEventListener('keydown', keyHandler);
-        timerEl.textContent = clock(secs);
+        timerEl.textContent = '⏱ ' + clock(secs);
         if (daily && saved.done) { Object.keys(puzzle.cells).forEach((k) => { letters[k] = puzzle.cells[k].ch; }); draw(); return win(true); }
         draw();
 
         function clock(s) { return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
         function cellOf(w, i) { return w.dir === 'across' ? [w.y, w.x + i] : [w.y + i, w.x]; }
         function wordsAt(y, x) { return puzzle.words.filter((w) => w.dir === 'across' ? w.y === y && x >= w.x && x < w.x + w.w.length : w.x === x && y >= w.y && y < w.y + w.w.length); }
-        function persist() { if (daily) store.set('xword-daily', { ...saved, letters, hints, secs, revealed: [...revealed], done }); }
+        function persist() { if (daily) store.set('xword-daily', { ...saved, letters, help, hintAt, secs, revealed: [...revealed], done }); }
+        function idx(w) { return puzzle.words.indexOf(w); }
+        function worth(w) { const hp = help[idx(w)]; return hp === 'reveal' ? 0 : hp === 'hint' ? WORD_POINTS / 2 : WORD_POINTS; }
+        const count = (kind) => Object.values(help).filter((v) => v === kind).length;
+        const helpText = () => { const n = count('hint'), m = count('reveal'); return [n ? `${n} hint${n === 1 ? '' : 's'}` : '', m ? `${m} revealed` : ''].filter(Boolean).join(', ') || 'no help'; };
 
         function tap(y, x, prefer) {
           if (done) return;
@@ -232,22 +240,40 @@
           else if (pos > 0) { pos--; const k2 = cellOf(active, pos).join(); if (!revealed.has(k2)) delete letters[k2]; }
           draw(); persist();
         }
+        // Hint: the word's first letter and where it is in the Bible. The word is then worth half.
         function hint() {
-          if (done) return;
-          let k = cellOf(active, pos).join();
-          if (letters[k] === puzzle.cells[k].ch) {
-            let j = [...active.w].findIndex((ch, i) => letters[cellOf(active, i).join()] !== ch);
-            if (j < 0) { // this word is right: hint the next unfinished word instead
-              const w = puzzle.words.find((x) => !wordDone(x));
-              if (!w) return;
-              active = w; j = [...w.w].findIndex((ch, i) => letters[cellOf(w, i).join()] !== ch);
-            }
-            pos = j; k = cellOf(active, j).join();
-          }
-          letters[k] = puzzle.cells[k].ch; revealed.add(k); hints++;
-          note.textContent = `Hint used (−${HINT_COST}).`;
-          if (pos < active.w.length - 1) pos++;
+          if (done || wordDone(active) || help[idx(active)]) return;
+          const i = idx(active);
+          help[i] = 'hint'; hintAt[i] = secs;
+          const k = cellOf(active, 0).join();
+          letters[k] = puzzle.cells[k].ch; revealed.add(k);
+          if (pos === 0 && active.w.length > 1) pos = 1;
+          note.textContent = '';
           draw(); persist(); if (solved()) win(false);
+        }
+        // Reveal: fills in the whole word, which then scores nothing.
+        function reveal() {
+          if (done || wordDone(active) || help[idx(active)] !== 'hint') return;
+          help[idx(active)] = 'reveal';
+          active.w.split('').forEach((ch, j) => { const k = cellOf(active, j).join(); if (letters[k] !== ch) { letters[k] = ch; revealed.add(k); } });
+          note.textContent = '';
+          draw(); persist();
+          if (solved()) win(false); else jump(1);
+        }
+        function drawHelp() {
+          if (done) { helpRow.replaceChildren(); return; }
+          const i = idx(active), state = help[i];
+          const pts = h('span', { class: 'xw-worth' }, `Worth ${worth(active)} pts`);
+          if (wordDone(active)) { helpRow.replaceChildren(pts, h('span', { class: 'ref' }, state === 'reveal' ? 'Answer revealed.' : 'Solved!')); return; }
+          if (!state) {
+            helpRow.replaceChildren(pts, h('button', { class: 'btn btn-small', type: 'button', onclick: hint }, `Hint (½ points)`));
+            return;
+          }
+          const wait = REVEAL_AFTER - (secs - (hintAt[i] || 0));
+          const tip = h('span', { class: 'xw-tip' }, `Starts with ${active.w[0]} · ${active.ref || 'see the clue'}`);
+          helpRow.replaceChildren(pts, tip, wait > 0
+            ? h('span', { class: 'ref xw-wait' }, `Reveal in ${wait}s`)
+            : h('button', { class: 'btn btn-small xw-reveal', type: 'button', onclick: reveal }, 'Reveal answer (0 pts)'));
         }
         function check() {
           let wrong = 0;
@@ -272,19 +298,22 @@
           const section = (dir) => h('section', null, h('h3', null, dir === 'across' ? 'Across' : 'Down'),
             h('ol', { class: 'xw-cluelist' }, puzzle.words.filter((w) => w.dir === dir).map((w) => h('li', {
               class: (w === active ? 'on ' : '') + (wordDone(w) ? 'done' : ''),
-            }, h('button', { type: 'button', onclick: () => { active = w; pos = 0; draw(); } }, h('b', null, w.num), ' ', w.clue)))));
+            }, h('button', { type: 'button', onclick: () => { active = w; pos = 0; draw(); } }, h('b', null, w.num), ' ', w.clue,
+              help[idx(w)] ? h('span', { class: 'xw-tag' }, help[idx(w)] === 'hint' ? '½' : '0 pts') : '')))));
           lists.replaceChildren(section('across'), section('down'));
+          drawHelp();
         }
 
         function win(already) {
-          done = true; clearInterval(tick); stopKeys(); kb.remove(); hintBtn.remove(); checkBtn.remove();
+          done = true; clearInterval(tick); stopKeys(); kb.remove(); helpRow.remove(); checkBtn.remove();
           Object.values(cellEls).forEach((el) => el.classList.add('solved'));
           persist();
-          const points = Math.max(100, puzzle.words.length * 150 - hints * HINT_COST + Math.max(0, 600 - secs));
+          const earned = puzzle.words.reduce((t, w) => t + worth(w), 0);
+          const points = earned + (earned ? Math.max(0, 600 - secs) : 0); // no speed bonus if every word was revealed
           if (!already) BP.confetti();
           const kids = [
             h('div', { class: 'feedback good' },
-              h('strong', null, `${BP.cheer()} Solved in ${clock(secs)}${hints ? ` with ${hints} hint${hints === 1 ? '' : 's'}` : ' with no hints'}.`),
+              h('strong', null, `${earned ? BP.cheer() : 'All filled in.'} Solved in ${clock(secs)} with ${helpText()}: ${earned} of ${puzzle.words.length * WORD_POINTS} word points.`),
               h('p', null, 'Every answer comes from the same big story, and it all points to Jesus.')),
             BP.verse(verse),
             h('details', { class: 'xw-answers' }, h('summary', null, 'Where the answers come from'),
@@ -294,9 +323,9 @@
               h('button', { class: 'btn', onclick: menu }, 'Back')),
           ];
           if (!already) kids.push(BP.finish('crossword', {
-            points, secs, detail: daily ? 'Daily' : 'Practice', coins: Math.max(2, puzzle.words.length * 4 - hints * 2 + 10),
-            board: daily, big: clock(secs), sub: `${hints} hint${hints === 1 ? '' : 's'} · ${daily ? 'Today’s puzzle' : 'Practice'}`,
-            shareText: () => `I solved ${daily ? `the Bible Crossword for ${today()}` : 'a Bible Crossword'} in ${clock(secs)} with ${hints} hint${hints === 1 ? '' : 's'}. Can you beat that?`,
+            points, secs, detail: daily ? 'Daily' : 'Practice', coins: Math.max(2, Math.round(earned / 40) + 10),
+            board: daily, big: clock(secs), sub: `${helpText()} · ${daily ? 'Today’s puzzle' : 'Practice'}`,
+            shareText: () => `I solved ${daily ? `the Bible Crossword for ${today()}` : 'a Bible Crossword'} in ${clock(secs)} with ${helpText()}. Can you beat that?`,
           }));
           else kids.push(h('p', { class: 'ref' }, 'You’ve solved today’s puzzle. A new one arrives tomorrow.'));
           after.replaceChildren(...kids);
