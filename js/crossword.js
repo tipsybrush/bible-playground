@@ -19,10 +19,16 @@
   // ---- Grid building ----
   // Try to place each word so it crosses an existing one, following normal crossword rules:
   // no two words touch side by side, and every word has a clear cell before and after it.
-  function build(size, target, r) {
+  // maxHard caps how many words may come from outside the easy list (0 = easy words only).
+  function build(size, target, r, maxHard = target) {
     let best = null;
+    const bank = CROSSWORD_WORDS.filter((x) => x.w.length <= size && x.w.length >= 3)
+      .map((x) => (x.w in CROSSWORD_EASY ? { ...x, easy: true, clue: CROSSWORD_EASY[x.w] || x.clue } : x));
     for (let attempt = 0; attempt < 40; attempt++) {
-      const pool = shuffleWith(CROSSWORD_WORDS.filter((x) => x.w.length <= size && x.w.length >= 3), r);
+      // Easy words come first, so the grid is built mostly from them; a few harder words are mixed in later.
+      const easy = shuffleWith(bank.filter((x) => x.easy), r), hard = shuffleWith(bank.filter((x) => !x.easy), r);
+      const pool = maxHard ? shuffleWith([...easy.slice(0, 40), ...hard.slice(0, maxHard * 4)], r).concat(easy.slice(40)) : easy;
+      let hardUsed = 0;
       const cells = {}; // "r,c" -> { ch, across, down }
       const placed = [];
       const key = (y, x) => y + ',' + x;
@@ -54,7 +60,7 @@
         placed.push({ ...entry, y, x, dir });
       }
 
-      const first = pool.find((x) => x.w.length >= Math.min(5, size - 2));
+      const first = pool.find((x) => x.easy && x.w.length >= Math.min(5, size - 2));
       if (!first) break;
       const firstDir = r() < 0.5 ? 'across' : 'down';
       const off = Math.floor(r() * (size - first.w.length + 1)), mid = Math.floor(size / 2) - (r() < 0.5 ? 1 : 0);
@@ -62,14 +68,14 @@
 
       for (const entry of pool) {
         if (placed.length >= target) break;
-        if (placed.some((p) => p.w === entry.w)) continue;
+        if (placed.some((p) => p.w === entry.w) || (!entry.easy && hardUsed >= maxHard)) continue;
         let options = [], top = 0;
         for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) for (const dir of ['across', 'down']) {
           const c = fits(entry.w, y, x, dir);
           if (c > top) { top = c; options = []; }
           if (c > 0 && c === top) options.push([y, x, dir]);
         }
-        if (options.length) { const [y, x, dir] = options[Math.floor(r() * options.length)]; place(entry, y, x, dir); }
+        if (options.length) { const [y, x, dir] = options[Math.floor(r() * options.length)]; place(entry, y, x, dir); if (!entry.easy) hardUsed++; }
       }
       const score = placed.length * 10 + Object.keys(cells).length / 10;
       if (!best || score > best.score) best = { score, placed: placed.slice(), cells: { ...cells } };
@@ -85,7 +91,18 @@
     return { size, words: best.placed, cells: best.cells, numbers };
   }
 
-  BP.crosswordBuild = (size, target, seed) => build(size, target, rng(seed)); // for testing
+  BP.crosswordBuild = (size, target, seed, maxHard) => build(size, target, rng(seed), maxHard); // for testing
+
+  // Difficulty grows with the number of puzzles a player has finished: the first ones use only
+  // well-known words with every first letter given, then the letters go, then harder words creep in.
+  function stage() {
+    const n = store.get('xword-solved', 0);
+    if (n < 2) return { maxHard: 0, firstLetters: true };
+    if (n < 5) return { maxHard: 0, firstLetters: false };
+    if (n < 9) return { maxHard: 1, firstLetters: false };
+    if (n < 15) return { maxHard: 2, firstLetters: false };
+    return { maxHard: 4, firstLetters: false };
+  }
 
   BP.games.crossword = {
     title: 'Bible Crossword',
@@ -118,6 +135,7 @@
             h('li', null, 'Tap a square, then type. Tap the same square again to switch between across and down.'),
             h('li', null, `Each word is worth ${WORD_POINTS} points. Stuck? A hint gives you the first letter and where to find it in the Bible, but halves that word’s points.`),
             h('li', null, `Still stuck ${REVEAL_AFTER} seconds after a hint? You can reveal the whole word, but it scores nothing.`),
+            h('li', null, 'Practice starts easy: your first puzzles give you the first letter of every word, then the words get harder as you solve more.'),
             h('li', null, 'Today’s puzzle is the same for everyone. Practice puzzles are new every time.')),
           h('div', { class: 'size-row' }, h('span', { class: 'ref' }, 'Practice size:'), btns),
           h('div', { class: 'btn-row' },
@@ -130,16 +148,21 @@
         const seed = daily ? hash('xword:' + today()) : Math.floor(Math.random() * 2 ** 32);
         const sz = daily ? SIZES.big : SIZES[size];
         const r = rng(seed);
-        const puzzle = build(sz.n, sz.words, r);
+        // Today's puzzle is the same for everyone, so it stays mostly easy words with just two harder ones.
+        const lvl = daily ? { maxHard: 2, firstLetters: false } : stage();
+        const puzzle = build(sz.n, sz.words, r, lvl.maxHard);
         const verse = CROSSWORD_VERSES[Math.floor(r() * CROSSWORD_VERSES.length)];
         const N = puzzle.size;
 
         let saved = daily ? store.get('xword-daily', null) : null;
-        if (!saved || saved.date !== today() || !saved.help) saved = { date: today(), letters: {}, help: {}, hintAt: {}, secs: 0, done: false };
+        // v2: puzzles built from the easy word list; older half-done grids from today no longer line up.
+        if (!saved || saved.date !== today() || !saved.help || (saved.v !== 2 && !saved.done)) saved = { v: 2, date: today(), letters: {}, help: {}, hintAt: {}, secs: 0, done: false };
         const letters = daily ? { ...saved.letters } : {};
         const help = daily ? { ...saved.help } : {}, hintAt = daily ? { ...saved.hintAt } : {}; // word index -> 'hint' | 'reveal'
         let secs = daily ? saved.secs : 0, done = false;
         let active = puzzle.words[0], pos = 0, revealed = new Set(daily ? saved.revealed || [] : []);
+        // First puzzles: every word's first letter is filled in for free.
+        if (lvl.firstLetters) puzzle.words.forEach((w) => { const k = w.y + ',' + w.x; letters[k] = puzzle.cells[k].ch; revealed.add(k); });
 
         const cellEls = {};
         const grid = h('div', { class: 'xw-grid', style: `--n:${N}`, role: 'grid', 'aria-label': 'Crossword grid' });
@@ -224,6 +247,8 @@
         }
         function type(L) {
           if (done) return;
+          // Skip over given letters, unless the player is typing that same letter.
+          while (pos < active.w.length - 1 && revealed.has(cellOf(active, pos).join()) && letters[cellOf(active, pos).join()] !== L) pos++;
           const k = cellOf(active, pos).join();
           if (!revealed.has(k)) letters[k] = L;
           note.textContent = '';
@@ -304,6 +329,7 @@
         }
 
         function win(already) {
+          if (!already) store.set('xword-solved', store.get('xword-solved', 0) + 1);
           done = true; clearInterval(tick); stopKeys(); kb.remove(); helpRow.remove(); checkBtn.remove();
           Object.values(cellEls).forEach((el) => el.classList.add('solved'));
           persist();

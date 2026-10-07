@@ -767,3 +767,31 @@ window.CROSSWORD_VERSES = [
   { text: 'But thou, Bethlehem Ephratah, though thou be little among the thousands of Judah, yet out of thee shall he come forth unto me that is to be ruler in Israel; whose goings forth have been from of old, from everlasting.', ref: 'Micah 5:2' },
   { text: 'Therefore the Lord himself shall give you a sign; Behold, a virgin shall conceive, and bear a son, and shall call his name Immanuel.', ref: 'Isaiah 7:14' }
 ];
+
+// Well-known words for the easy start. A clue here replaces the bank's clue with a plainer one ('' keeps it).
+window.CROSSWORD_EASY = {
+  ADAM: 'The first man God made', EVE: 'The first woman, Adam’s wife', CAIN: 'Adam’s son who killed his brother Abel', ABEL: 'Adam’s son, killed by his brother Cain',
+  NOAH: '', ABRAHAM: 'Father of Isaac, called the father of many nations', SARAH: 'Abraham’s wife, mother of Isaac', ISAAC: 'Son of Abraham and Sarah',
+  JACOB: 'Twin brother of Esau', ESAU: 'Twin brother of Jacob', JOSEPH: 'Son of Jacob with a coat of many colours', MOSES: 'Led Israel out of Egypt',
+  AARON: 'Brother of Moses', PHARAOH: '', JOSHUA: 'Led Israel after Moses; the walls of Jericho fell', GIDEON: 'Judge who asked God for a sign with a fleece',
+  SAMSON: 'Strong man whose power was in his long hair', DELILAH: 'Woman who cut Samson’s hair', RUTH: 'Loyal daughter-in-law of Naomi', NAOMI: 'Ruth’s mother-in-law',
+  SAMUEL: 'Boy who heard God call him in the night', SAUL: 'Israel’s first king', DAVID: '', GOLIATH: 'Giant David defeated with a sling',
+  SOLOMON: 'Wise king, son of David', ELIJAH: 'Prophet fed by ravens, taken to heaven in a chariot of fire', ESTHER: 'Jewish girl who became queen and saved her people', DANIEL: '',
+  JONAH: '', JOB: 'Lost everything but kept trusting God', MARY: '', JESUS: 'Son of God, born in Bethlehem', PETER: 'Fisherman who walked on water toward Jesus',
+  ANDREW: 'Apostle, brother of Simon Peter', JAMES: '', JOHN: 'Apostle, brother of James', THOMAS: '', MATTHEW: '', JUDAS: '', MARTHA: 'Sister of Mary and Lazarus',
+  LAZARUS: 'Friend Jesus raised from the dead', PILATE: '', PAUL: 'Apostle who wrote many letters, once named Saul', ZACCHAEUS: '', SATAN: 'The devil who tempted Jesus',
+  GABRIEL: '', HEROD: '', EDEN: 'Garden where Adam and Eve lived', EGYPT: 'Land where Israel were slaves', BABEL: '', JERICHO: '', SINAI: 'Mountain where Moses got the Ten Commandments',
+  JORDAN: '', GALILEE: 'Sea Jesus walked on', BETHLEHEM: 'Town where Jesus was born', NAZARETH: '', JERUSALEM: 'City of the temple and King David', CALVARY: 'Hill where Jesus was crucified',
+  NINEVEH: 'City God sent Jonah to', ARK: 'Big boat Noah built', FLOOD: 'Waters that covered the earth in Noah’s day', RAINBOW: 'Sign of God’s promise after the flood',
+  MANNA: 'Bread from heaven in the desert', SLING: '', LION: 'Samson killed one with his bare hands', LIONS: 'Daniel spent a night in their den', DOVE: 'Bird Noah sent out; it came back with an olive leaf',
+  STAR: '', GOLD: 'A gift of the wise men', MYRRH: '', MANGER: '', CROSS: 'Jesus died on it', TOMB: '', FISH: 'Jonah was swallowed by a big one', LOAVES: 'Jesus fed 5000 with five of these',
+  BREAD: '', WINE: '', WATER: 'Jesus turned it into wine', SHEEP: 'Animals a shepherd looks after', LAMB: 'A baby sheep; Jesus is called the ___ of God', CROWN: 'Jesus wore one made of thorns',
+  WHALE: '', FIRE: 'Moses saw a bush on ___ that did not burn up', SWORD: '', SERPENT: 'Snake that tempted Eve', FROGS: 'A plague that hopped all over Egypt',
+  STONE: 'Rolled away from Jesus’ tomb', CAMEL: '', COAT: 'Joseph’s gift of many colours', LADDER: '', TEMPLE: '', ANGEL: '', HEAVEN: '', AMEN: '',
+  LOVE: 'God is ___', FAITH: '', HOPE: 'Faith, ___ and love', JOY: '', PEACE: '', GRACE: '', PRAYER: 'Talking to God', CHURCH: '', KING: '', TWELVE: '', FORTY: '',
+  SEVEN: 'Days in the creation week', TEN: '', GENESIS: '', EXODUS: '', PSALMS: 'Book of songs, many by David', ACTS: '', SIN: 'Doing wrong against God',
+  PASSOVER: '', HOLY: '', SPIRIT: 'The Holy ___ came at Pentecost', SABBATH: '', SHEPHERD: 'David’s job as a boy', GARDEN: 'Eden was one', PALM: '', FIG: '',
+  TREE: 'Zacchaeus climbed one to see Jesus', LIGHT: 'God said: Let there be ___', ROCK: '', SAND: '', SEED: '', SALT: 'Lot’s wife became a pillar of it', NET: 'Fishermen cast it into the sea',
+  DISCIPLE: 'A follower of Jesus', MIRACLE: '', RISEN: '', SAVIOUR: '', SEA: 'Moses parted the Red ___', BUSH: '', CALF: '', HARP: '', ALTAR: '',
+  VINE: '', WAY: '', TRUTH: '', LIFE: '', FATHER: '', GLORY: '', WISDOM: '',
+};
