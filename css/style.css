@@ -127,7 +127,8 @@ a { color: inherit; }
     8px 10px 0 var(--edge);
   position: relative;
 }
-.wordmark .wm-b { color: var(--coin); display: block; }
+.wordmark .wm-b { color: var(--coin); display: block; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; perspective: 600px; }
+.wm-letter { display: inline-block; transform-origin: 50% 80%; }
 .tagline {
   font-size: 1.1rem; max-width: 42ch; font-weight: 700;
   background: var(--surface); border: var(--block) solid var(--edge); padding: 10px 14px;

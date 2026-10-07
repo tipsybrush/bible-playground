@@ -230,6 +230,7 @@
     tick: [[880, 0.03]],
     win: [[523, 0.09], [659, 0.09], [784, 0.09], [1047, 0.25]],
     level: [[784, 0.08], [988, 0.08], [1175, 0.08], [1568, 0.3]],
+    egg: [[523, 0.05], [659, 0.05], [784, 0.05], [1047, 0.05], [1319, 0.12]],
   };
   BP.sfx = function (name) {
     if (!BP.soundOn() || !NOTES[name]) return;
@@ -562,6 +563,42 @@
     if (el && /^https:\/\//.test(url || '')) { el.href = url; el.hidden = false; }
   }
 
+  // Easter egg: tap the "Playground" wordmark and its letters dance. Each tap plays the next move.
+  function wordmarkEgg() {
+    const wm = document.querySelector('#home .wordmark .wm-b');
+    if (!wm) return;
+    const word = wm.textContent;
+    wm.setAttribute('aria-label', word);
+    wm.replaceChildren(...[...word].map((ch) => BP.h('span', { class: 'wm-letter', 'aria-hidden': 'true' }, ch)));
+    const letters = [...wm.children];
+    const rand = (a, b) => a + Math.random() * (b - a);
+    const moves = [
+      // Wave: each letter hops like a block that just got bumped.
+      (el, i) => el.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-0.45em)', offset: 0.35 }, { transform: 'translateY(0.06em)', offset: 0.7 }, { transform: 'translateY(0)' }],
+        { duration: 520, delay: i * 55, easing: 'cubic-bezier(.3,.7,.4,1)' }),
+      // Flip: letters spin round one after another.
+      (el, i) => el.animate([{ transform: 'rotateY(0)' }, { transform: 'rotateY(360deg)' }], { duration: 650, delay: i * 45, easing: 'cubic-bezier(.5,0,.3,1)' }),
+      // Scatter: letters fly apart and snap back into place.
+      (el, i) => el.animate([{ transform: 'none' },
+        { transform: `translate(${rand(-1.2, 1.2)}em, ${rand(-1, 0.6)}em) rotate(${rand(-160, 160)}deg) scale(${rand(0.5, 1.4)})`, offset: 0.4 },
+        { transform: 'none' }], { duration: 900, delay: i * 15, easing: 'cubic-bezier(.6,-0.3,.3,1.4)' }),
+      // Squash and stretch with a colour pop.
+      (el, i) => el.animate([{ transform: 'scale(1,1)', color: 'var(--coin)' }, { transform: 'scale(1.35,0.6)', offset: 0.25 },
+        { transform: 'scale(0.75,1.45)', color: `hsl(${i * 36}, 90%, 62%)`, offset: 0.55 }, { transform: 'scale(1,1)', color: 'var(--coin)' }],
+        { duration: 700, delay: i * 40, easing: 'ease-in-out' }),
+    ];
+    let next = 0, busy = false;
+    wm.addEventListener('click', () => {
+      if (busy) return;
+      if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) { BP.sfx('egg'); return; }
+      busy = true;
+      const move = moves[next++ % moves.length];
+      const anims = letters.map((el, i) => move(el, i));
+      BP.sfx('egg'); BP.buzz && BP.buzz(15);
+      Promise.all(anims.map((a) => a.finished)).catch(() => {}).then(() => { busy = false; });
+    });
+  }
+
   function offline() {
     if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
     window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
@@ -573,7 +610,7 @@
     if (invite) invite.addEventListener('click', () => BP.share.invite(document.getElementById('invite-note')));
     window.addEventListener('hashchange', route);
     soundToggle(); watchFeedback(); keyboard(); edgeSwipe(); prefetchOnIntent(); offline();
-    coffee(); menu(); fullscreen();
+    coffee(); menu(); fullscreen(); wordmarkEgg();
     document.querySelectorAll('[data-nick]').forEach((el) => { el.textContent = BP.nick.get(); });
     const nickBtn = document.getElementById('nick-change');
     if (nickBtn) nickBtn.addEventListener('click', () => BP.nick.prompt(false));
