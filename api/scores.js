@@ -4,9 +4,11 @@
 //   GET  /api/scores?overall=1  -> { overall: [top 100 across all games] }
 //   POST /api/scores {game, name, score, detail, secs, boost, crown, at}
 //        -> { board: [top 100], saved }
-// Each nickname keeps only its best run per game.
+// Each player keeps only their best run per game. Players are told apart by a private random id
+// their browser sends (stored as a short hash), so two people who pick the same nickname both count.
 // Writes use the file's ETag (ifMatch), so two players saving at once never wipe each other out.
-import { get, put, BlobPreconditionFailedError } from '@vercel/blob';
+import { createHash } from 'node:crypto';
+import { get, head, put, BlobNotFoundError, BlobPreconditionFailedError } from '@vercel/blob';
 
 const FILE = 'leaderboards/boards.json';
 const SHOW = 10;
@@ -19,9 +21,10 @@ const BLOCKED_WORDS = ['ass', 'arse', 'sex', 'dick', 'cock', 'fag', 'rape', 'naz
 
 const secsOf = (r) => (typeof r.secs === 'number' ? r.secs : Infinity);
 const beats = (a, b) => b.score - a.score || secsOf(a) - secsOf(b) || a.at - b.at;
+const keyOf = (r) => r.id || 'n:' + String(r.name).toLowerCase();
 const sortTop = (rows, n = KEEP) => {
   const best = new Map();
-  rows.slice().sort(beats).forEach((r) => { const k = String(r.name).toLowerCase(); if (!best.has(k)) best.set(k, r); });
+  rows.slice().sort(beats).forEach((r) => { const k = keyOf(r); if (!best.has(k)) best.set(k, r); });
   return [...best.values()].slice(0, n);
 };
 
@@ -35,7 +38,7 @@ function overall(boards, n = KEEP) {
     const top = rows.length ? rows[0].score : 0;
     if (top <= 0) return;
     rows.forEach((r) => {
-      const k = String(r.name).toLowerCase();
+      const k = keyOf(r);
       const a = acc.get(k) || { name: r.name, points: 0, games: 0, crown: false };
       a.points += Math.round((1000 * r.score) / top); a.games++; a.crown = a.crown || !!r.crown;
       acc.set(k, a);
@@ -55,23 +58,38 @@ function okName(raw) {
 function clean(body) {
   if (!body || !GAMES.includes(body.game)) return null;
   const name = okName(body.name);
-  const score = Number(body.score);
-  if (!name || !Number.isInteger(score) || score < 1 || score > 1000000) return null;
+  const score = Math.round(Number(body.score));
+  if (!name || !Number.isFinite(score) || score < 1 || score > 1000000) return null;
   const entry = { name, score, detail: String(body.detail || '').slice(0, 60), at: Date.now() };
   const at = Number(body.at);
   if (Number.isFinite(at) && Math.abs(at - entry.at) < 86400000) entry.at = at; // keep the player's own stamp so their row can be highlighted
-  const secs = Number(body.secs);
-  if (Number.isInteger(secs) && secs >= 0 && secs <= 86400) entry.secs = secs;
+  const secs = Math.round(Number(body.secs));
+  if (body.secs != null && Number.isFinite(secs) && secs >= 0 && secs <= 86400) entry.secs = secs;
+  if (typeof body.pid === 'string' && /^[A-Za-z0-9_-]{8,64}$/.test(body.pid)) entry.id = playerId(body.pid);
   if (body.boost === true) entry.boost = true;
   if (body.crown === true) entry.crown = true;
   return { game: body.game, entry };
 }
 
+// Same hash as playerId() in js/leaderboard.js; the raw id never leaves the player's browser otherwise.
+function playerId(pid) { return createHash('sha256').update('bp:' + pid).digest('hex').slice(0, 12); }
+
+// head() asks the Blob API itself, so it always knows the current version. The read that follows
+// names that version in its URL, so no cache along the way can hand back an older copy, or a
+// "not found" left over from before the file existed. (Plain reads sometimes came back empty, which
+// made saves fail as "busy" and the boards look blank.)
 async function load() {
-  const res = await get(FILE, { access: 'private', useCache: false });
-  if (!res || res.statusCode !== 200) return { boards: {}, etag: null };
-  const boards = JSON.parse(await new Response(res.stream).text());
-  return { boards, etag: res.blob.etag };
+  for (let tries = 0; ; tries++) {
+    let meta;
+    try { meta = await head(FILE); }
+    catch (e) { if (e instanceof BlobNotFoundError) return { boards: {}, etag: null }; throw e; }
+    const res = await get(`${meta.url}?v=${encodeURIComponent(meta.etag)}`, { access: 'private', useCache: false });
+    if (res && res.statusCode === 200 && (!res.blob.etag || res.blob.etag === meta.etag)) {
+      return { boards: JSON.parse(await new Response(res.stream).text()), etag: meta.etag };
+    }
+    if (tries >= 4) throw new Error('Could not read the leaderboards');
+    await new Promise((r) => setTimeout(r, 100 * (tries + 1)));
+  }
 }
 
 async function save(boards, etag) {
@@ -98,6 +116,7 @@ export async function GET(request) {
     // The CDN answers repeat visits for a few seconds, so busy moments don't hit storage every time.
     return json({ boards: out }, 200, 'public, max-age=0, s-maxage=10, stale-while-revalidate=60');
   } catch (e) {
+    console.error('scores GET', e && e.message);
     return json({ error: 'Could not load the leaderboards' }, 500);
   }
 }
@@ -111,16 +130,33 @@ export async function POST(request) {
     if (tries) await new Promise((r) => setTimeout(r, 30 + Math.random() * 120 * tries));
     try {
       const { boards, etag } = await load();
-      const before = boards[item.game] || [];
-      const board = sortTop([...before, item.entry]);
-      if (!board.includes(item.entry)) return json({ board, saved: false });
+      const me = item.entry;
+      let changed = false;
+      if (me.id) {
+        GAMES.forEach((g) => {
+          if (!boards[g]) return;
+          boards[g] = boards[g].map((r) => {
+            // Rows saved before ids existed are claimed by the first player who saves under that name.
+            const mine = r.id === me.id || (g === item.game && !r.id && String(r.name).toLowerCase() === me.name.toLowerCase());
+            // A player who changed their nickname shows under the new one everywhere.
+            if (mine && (r.id !== me.id || r.name !== me.name)) { changed = true; return { ...r, id: me.id, name: me.name }; }
+            return r;
+          });
+        });
+      }
+      const board = sortTop([...(boards[item.game] || []), me]);
+      if (!board.includes(me)) {
+        if (changed) await save(boards, etag);
+        return json({ board, saved: false });
+      }
       boards[item.game] = board;
       await save(boards, etag);
       return json({ board, saved: true });
     } catch (e) {
-      // Someone else saved at the same moment (or the file was just created): read again and retry.
+      // Someone else saved at the same moment, the file was just created, or a read hiccupped:
+      // read again and retry. Anything else is logged so it shows up in the Vercel logs.
       if (!(e instanceof BlobPreconditionFailedError) && !/already exists|precondition/i.test(String(e && e.message))) {
-        return json({ error: 'Could not save your score' }, 500);
+        console.error('scores POST', tries, e && e.message);
       }
     }
   }

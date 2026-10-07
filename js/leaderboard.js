@@ -19,10 +19,35 @@
   const clock = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
   const same = (a, b) => String(a).toLowerCase() === String(b).toLowerCase();
 
-  // Best run per nickname, best first.
+  // Rows carry a short hash of the player's private id, so two players with the same nickname
+  // each keep their own place. Older rows without one fall back to the nickname.
+  const keyOf = (r) => r.id || 'n:' + String(r.name).toLowerCase();
+
+  // This browser's id: a random string made once and kept here. Only its hash appears on boards
+  // (the same hash api/scores.js makes), so nobody can copy it from a board to post as someone else.
+  function pid() {
+    let id = store.get('pid', '');
+    if (!/^[A-Za-z0-9_-]{8,64}$/.test(id)) {
+      const bytes = new Uint8Array(16);
+      (window.crypto || {}).getRandomValues ? crypto.getRandomValues(bytes) : bytes.forEach((_, i) => { bytes[i] = Math.random() * 256; });
+      id = [...bytes].map((b) => b.toString(36).padStart(2, '0')).join('').slice(0, 24);
+      store.set('pid', id);
+    }
+    return id;
+  }
+  const myId = (async () => {
+    try {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('bp:' + pid()));
+      return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 12);
+    } catch (e) { return ''; } // no crypto.subtle (opened from disk): match on nickname instead
+  })();
+  // Is this row the player's own? Rows with an id must match it; older rows match on nickname.
+  const isMine = (r, name, id) => (r.id && id ? r.id === id : same(r.name, name));
+
+  // Best run per player, best first.
   function rank(rows, n = KEEP) {
     const best = new Map();
-    rows.slice().sort(beats).forEach((r) => { const k = String(r.name).toLowerCase(); if (!best.has(k)) best.set(k, r); });
+    rows.slice().sort(beats).forEach((r) => { const k = keyOf(r); if (!best.has(k)) best.set(k, r); });
     return [...best.values()].slice(0, n);
   }
 
@@ -37,7 +62,7 @@
       const top = rows.length ? rows[0].score : 0;
       if (top <= 0) return;
       rows.forEach((r) => {
-        const k = String(r.name).toLowerCase();
+        const k = keyOf(r);
         const a = acc.get(k) || { name: r.name, points: 0, games: 0, crown: false };
         a.points += Math.round((1000 * r.score) / top); a.games++; a.crown = a.crown || !!r.crown;
         acc.set(k, a);
@@ -111,8 +136,16 @@
       },
       async overall() { return (await get('?overall=1')).overall || []; },
       async submit(game, entry) {
-        const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game, ...entry }) });
-        if (!res.ok) throw new Error('Could not save your score');
+        const body = JSON.stringify({ game, ...entry, pid: pid() });
+        let res;
+        // One quiet retry covers a dropped connection or a busy moment on the server.
+        for (let tries = 0; tries < 3; tries++) {
+          if (tries) await new Promise((r) => setTimeout(r, 800 * tries));
+          try { res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body }); }
+          catch (e) { res = null; continue; }
+          if (res.ok || (res.status >= 400 && res.status < 500)) break;
+        }
+        if (!res || !res.ok) throw new Error('Could not save your score');
         const { board } = await res.json();
         if (all) all = all.then((b) => ({ ...b, [game]: board.slice(0, SHOW) }));
         return rank(board);
@@ -175,17 +208,21 @@
         h('h3', { class: 'board-title' }, '🏆 ', `${title} leaderboard`), body);
 
       (async () => {
-        let backend, rows;
-        try { backend = await ready; rows = await backend.top(game, true); }
-        catch (e) { body.replaceChildren(h('p', { class: 'ref' }, 'The leaderboard is not available right now.')); return; }
+        const backend = await ready;
+        // If the board can't be loaded, still try to save: the server decides whether it counts.
+        let rows, loaded = true;
+        try { rows = await backend.top(game, true); } catch (e) { rows = []; loaded = false; }
 
         const name = BP.nick.get();
+        const id = await myId;
+        score = Math.round(score);
         const entry = { name, score, detail: detail || '', at: Date.now() };
-        if (typeof secs === 'number') entry.secs = secs;
+        if (id) entry.id = id;
+        if (typeof secs === 'number' && Number.isFinite(secs)) entry.secs = Math.round(secs);
         if (extra.boosted) entry.boost = true;
         if (BP.shop && BP.shop.has('crown')) entry.crown = true;
 
-        const old = rows.find((r) => same(r.name, name));
+        const old = rows.find((r) => isMine(r, name, id));
         const others = rows.filter((r) => r !== old);
         const place = others.filter((r) => beats(r, entry) < 0).length + 1; // where this run lands
         const better = score > 0 && (!old || beats(entry, old) < 0);
@@ -195,10 +232,10 @@
         if (better && fits) {
           try {
             rows = await backend.submit(game, entry) || rank([...others, entry]);
-            mine = rows.find((r) => same(r.name, name) && r.at === entry.at) || rows.find((r) => same(r.name, name)) || null;
+            mine = rows.find((r) => isMine(r, name, id) && r.at === entry.at) || rows.find((r) => isMine(r, name, id)) || null;
             saved = true;
           } catch (e) {
-            body.replaceChildren(h('p', { class: 'board-error' }, 'Your score could not be saved. Check your connection and play again.'), playingAs(), table(rows, old));
+            body.replaceChildren(h('p', { class: 'board-error' }, 'Your score could not be saved. Check your connection and play again.'), playingAs(), loaded ? table(rows, old) : '');
             return;
           }
         }
