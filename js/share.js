@@ -158,7 +158,7 @@
     const fresh = shuffled.filter((c) => !played.has(c.id));
     const picks = [...fresh, ...shuffled.filter((c) => played.has(c.id))].slice(0, 2);
     return h('section', { class: 'play-next' },
-      h('h3', null, 'Play next'),
+      h('h3', { class: 'fin-h' }, 'Play next'),
       h('div', { class: 'play-next-grid' }, picks.map((c) => {
         const card = c.el.cloneNode(true);
         card.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
@@ -174,11 +174,14 @@
     const reward = BP.player.award(o.coins || 0);
     const out = h('div', { class: 'finish' });
 
-    out.append(h('div', { class: 'reward', role: 'status' },
-      h('span', { class: 'gain' }, BP.coinEl(), `+${reward.gained} COINS`),
+    // One slim strip with what this run earned; the leaderboard adds the player's rank to it once known.
+    const rankChip = h('span', { class: 'fin-chip fin-rank', hidden: true });
+    out.append(h('div', { class: 'fin-strip', role: 'status' },
+      h('span', { class: 'fin-chip fin-coins' }, BP.coinEl(), `+${reward.gained} coins`),
       reward.levelUp
-        ? h('span', { class: 'levelup' }, `LEVEL UP! YOU’RE NOW A LV ${reward.level.lv} ${reward.level.title.toUpperCase()}`)
-        : h('span', null, `LV ${reward.level.lv} ${reward.level.title.toUpperCase()}`)));
+        ? h('span', { class: 'fin-chip fin-up' }, `Level up! LV ${reward.level.lv} ${reward.level.title}`)
+        : h('span', { class: 'fin-chip' }, `LV ${reward.level.lv} ${reward.level.title}`),
+      rankChip));
     if (reward.levelUp) BP.confetti();
     BP.track('game_finish', { game, score: Math.round(+o.points || 0), secs: Math.round(+o.secs || 0), detail: String(o.detail || '').slice(0, 40) });
     if (reward.levelUp) BP.track('level_up', { level: reward.level.lv });
@@ -193,7 +196,10 @@
     }
 
     // Leaderboard first: where this run ranks, saved automatically under the player's nickname.
-    if (board) out.append(BP.board.panel(game, o.points, o.detail, typeof o.secs === 'number' ? Math.round(o.secs) : undefined, { boosted: !!o.boosted }));
+    if (board) out.append(BP.board.panel(game, o.points, o.detail, typeof o.secs === 'number' ? Math.round(o.secs) : undefined, {
+      boosted: !!o.boosted,
+      onRank: (n) => { rankChip.replaceChildren(`🏆 #${n} on the board`); rankChip.hidden = false; },
+    }));
 
     const next = playNext(game);
     if (o.share === false) { if (next) out.append(next); return out; }
@@ -223,14 +229,16 @@
 
     out.append(h('section', { class: 'sharebox' },
       canvas,
+      h('div', { class: 'share-head' },
+        h('h3', { class: 'fin-h' }, board ? 'Brag about it!' : game === 'gifts' ? 'Share your gift' : 'Share it'),
+        h('p', { class: 'ref' }, board ? 'Send your score picture or dare a friend to beat it.' : 'Send your result picture to a friend.')),
       h('div', { class: 'share-main' },
-        h('h3', null, board ? 'Brag about it!' : game === 'gifts' ? 'Share your gift' : 'Share it'),
-        h('div', { class: 'btn-row' },
+        h('div', { class: 'btn-row share-btns' },
           h('button', { class: 'btn btn-primary', type: 'button', onclick: () => share({ title: 'Bible Playground', text: shareText(), url: link(game), canvas, game, kind: 'score' }, note, copyBox) }, board ? 'Share my score' : 'Share my result'),
           board
             ? h('button', { class: 'btn btn-green', type: 'button', onclick: () => share({ title: 'Bible Playground challenge', text: challengeText(), url: link(challengeHash(game, o.points, name())), game, kind: 'challenge' }, note, copyBox) }, 'Challenge a friend')
             : h('button', { class: 'btn btn-green', type: 'button', onclick: () => share({ title: 'Bible Playground', text: game === 'gifts' ? 'Take the Find Your Place quiz and see where you fit at church!' : `Play ${g.title} with me on Bible Playground!`, url: link(game), game, kind: 'invite' }, note, copyBox) }, 'Invite a friend'),
-          h('button', { class: 'btn btn-small', type: 'button', onclick: () => savePicture(canvas, `bible-playground-${game}.png`, note) }, 'Save picture')),
+          h('button', { class: 'btn btn-small share-save', type: 'button', onclick: () => savePicture(canvas, `bible-playground-${game}.png`, note) }, 'Save picture')),
         note, copyBox)));
 
     if (next) out.append(next);

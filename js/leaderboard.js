@@ -205,7 +205,7 @@
       const title = BP.games[game] ? BP.games[game].title : 'This game';
       const body = h('div', { class: 'lboard-body' }, h('p', { class: 'ref' }, 'Checking the leaderboard…'));
       const box = h('section', { class: 'lboard', 'aria-live': 'polite' },
-        h('h3', { class: 'board-title' }, '🏆 ', `${title} leaderboard`), body);
+        h('h3', { class: 'board-title fin-h' }, `${title} leaderboard`), body);
 
       (async () => {
         const backend = await ready;
@@ -247,16 +247,18 @@
             h('span', { class: 'board-place' }, `#${myRank}`),
             h('span', null, myRank === 1 ? `You’re number one on ${title}!` : myRank <= SHOW ? `You’re ${ordinal(myRank)} on the ${title} leaderboard!` : `You’re ${ordinal(myRank)} on ${title}. Keep climbing to reach the top 10!`));
           if (myRank <= 3) BP.confetti();
+          if (extra.onRank) extra.onRank(myRank);
         } else if (score <= 0) {
           banner = h('div', { class: 'board-banner low' }, h('span', null, 'Score some points to get on the board.'));
         } else if (old) {
           banner = h('div', { class: 'board-banner low' },
             h('span', { class: 'board-place' }, `#${myRank}`),
             h('span', null, `This run would be ${ordinal(place)}. Your best (${old.score.toLocaleString('en-US')}) still has you ${ordinal(myRank)}.`));
+          if (extra.onRank && myRank) extra.onRank(myRank);
         } else {
           banner = h('div', { class: 'board-banner low' }, h('span', null, `Not in the top ${KEEP} yet. Score ${(rows[SHOW - 1] || rows[rows.length - 1]).score.toLocaleString('en-US')} or more to reach the top 10.`));
         }
-        body.replaceChildren(banner, table(rows, mine), playingAs(), h('p', { class: 'ref' }, whereNote(backend)));
+        body.replaceChildren(banner, table(rows, mine), playingAs(), backend.shared ? '' : h('p', { class: 'ref' }, whereNote(backend)));
       })();
       return box;
     },

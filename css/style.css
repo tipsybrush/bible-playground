@@ -1694,3 +1694,67 @@ html:fullscreen, html:-webkit-full-screen { background: var(--sky-bottom); overf
 .guide-list span { display: block; margin-top: 4px; color: var(--muted); }
 .guide .panel-title { margin-top: 26px; }
 .guide > .panel { margin-bottom: 18px; }
+
+/* ---------- End-of-game screen (tidied 2026-10-08) ----------
+   One column of light, evenly spaced cards: what you earned, where you rank, share, play next. */
+.finish { gap: 14px; max-width: 640px; margin: 22px auto 0; }
+.result > .finish { justify-self: center; }
+.finish .fin-h, .finish .lboard .board-title { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; letter-spacing: .02em; color: var(--ink); }
+
+.fin-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.fin-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--surface-2); border: 2px solid var(--edge);
+  font-family: var(--font-display); font-weight: 700; font-size: .92rem; line-height: 1.2; color: var(--ink); }
+.fin-chip[hidden] { display: none; }
+.fin-coins { background: var(--hud-bg); color: var(--coin); }
+.fin-coins .coin-icon { animation: spin 0.8s steps(4) 3; }
+.fin-up { background: var(--grass); color: #10260A; }
+.fin-rank { background: var(--coin); color: var(--coin-ink, #2A1B00); }
+
+.finish .challenge-result { font-size: 1.02rem; padding: 10px 14px; border-width: 3px; text-align: center; }
+
+/* Leaderboard card: one flat card, slim rank line, plain rows */
+.finish > .lboard { max-width: none; padding: 16px; gap: 10px; background: var(--surface); border: 3px solid var(--edge); border-top: 6px solid var(--game); box-shadow: 4px 4px 0 var(--edge); }
+.finish .lboard-body { gap: 10px; }
+.finish .board-banner { gap: 10px; padding: 8px 12px; border-width: 2px; font-size: .95rem; }
+.finish .board-place { display: none; } /* the rank is already in the strip above */
+.finish .board-list { gap: 0; border: 2px solid var(--edge); }
+.finish .board-list li { padding: 7px 10px; border: 0; border-bottom: 1px solid var(--line); background: var(--surface); }
+.finish .board-list li:last-child { border-bottom: 0; }
+.finish .board-list li.me { outline: 0; background: color-mix(in srgb, var(--coin) 28%, var(--surface)); box-shadow: inset 4px 0 0 var(--coin); }
+.finish .board-list li:nth-child(-n+3) .board-rank { width: 1.9em; height: 1.9em; border-width: 1px; }
+.finish .board-detail { font-size: .78rem; }
+.finish .board-name { font-size: .95rem; }
+.finish .board-as { font-size: .88rem; }
+
+/* Share card: small picture beside the heading, buttons underneath */
+.finish .sharebox { grid-template-columns: 96px minmax(0, 1fr); grid-template-areas: "pic head" "pic main"; gap: 8px 16px; padding: 14px 16px;
+  background: var(--surface); box-shadow: 4px 4px 0 var(--edge); align-items: start; }
+.finish .sharebox canvas { grid-area: pic; max-width: 96px; border-width: 2px; }
+.finish .share-head { grid-area: head; display: grid; gap: 2px; align-self: center; }
+.finish .share-head .ref { margin: 0; font-size: .85rem; }
+.finish .share-main { grid-area: main; gap: 8px; }
+.finish .share-btns { gap: 8px; }
+.finish .share-btns .btn { padding: 8px 14px; font-size: .95rem; }
+.finish .share-note:empty { display: none; }
+@media (max-width: 560px) {
+  .finish .sharebox { grid-template-columns: 72px minmax(0, 1fr); grid-template-areas: "pic head" "main main"; }
+  .finish .sharebox canvas { max-width: 72px; }
+  .finish .share-btns { display: grid; grid-template-columns: 1fr; }
+  .finish .share-btns .share-save { grid-column: 1 / -1; justify-self: center; background: none; border: 0; box-shadow: none; text-decoration: underline; padding: 2px 8px; }
+}
+
+/* Play next: two slim cards, picture strip and title only */
+.finish .play-next-grid { gap: 10px; max-width: none; }
+.finish .play-next .fin-h { margin-bottom: 8px; }
+.finish .card-next .card-art { aspect-ratio: 16 / 7; }
+.finish .card-next .card-text { display: none; }
+.finish .card-next .card-title { font-size: 1rem; }
+.finish .card-next .world-tag { font-size: .5rem; }
+
+/* The game's own score block above: tighter on phones, buttons side by side */
+@media (max-width: 560px) {
+  .result > .panel-title { font-size: 1.35rem; }
+  .result > .btn-row { gap: 10px; }
+  .result > .btn-row > .btn { flex: 1 1 130px; padding-left: 8px; padding-right: 8px; font-size: .95rem; }
+}
+.finish .card-next .card-body { padding: 8px 12px 10px; }
