@@ -723,7 +723,17 @@
 
   function offline() {
     if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
-    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(() => {}); });
+    // When a new version of the site takes over, reload once so the update shows straight away.
+    // Only on the home page, so nobody loses a game in progress.
+    const hadOld = !!navigator.serviceWorker.controller;
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      const route = location.hash.replace('#', '');
+      if (!hadOld || reloaded || (route && route !== 'home')) return;
+      reloaded = true;
+      location.reload();
+    });
   }
 
   BP.start = function () {

@@ -1,7 +1,9 @@
-// Service worker: keeps a copy of the site so it opens instantly and works offline.
-// Pages are fetched fresh when there is a connection; scripts, data and styles are served from the
-// cache straight away and quietly refreshed in the background. Bump VERSION to clear old copies.
-const VERSION = 'bp-v31';
+// Service worker: keeps a copy of the site so it works offline and on bad connections.
+// Pages, scripts, styles and data are fetched fresh whenever the network answers within a few
+// seconds, so updates show up on the next visit; the saved copy is only used when it doesn't.
+// Icons and fonts are served from the saved copy straight away. Bump VERSION to clear old copies.
+const VERSION = 'bp-v32';
+const WAIT_MS = 3500;
 const CORE = ['./', 'index.html', 'css/style.css', 'js/config.js', 'js/app.js', 'js/leaderboard.js', 'js/player.js', 'js/share.js'];
 
 self.addEventListener('install', (e) => {
@@ -26,6 +28,17 @@ self.addEventListener('fetch', (e) => {
     e.respondWith(fetch(req)
       .then((res) => { const copy = res.clone(); caches.open(VERSION).then((c) => c.put(req, copy)); return res; })
       .catch(() => caches.match(req).then((hit) => hit || caches.match('index.html'))));
+    return;
+  }
+
+  // Code and content: network first, falling back to the saved copy if the network is slow or down.
+  if (!fonts && /\.(css|js|json)$/.test(url.pathname)) {
+    e.respondWith(caches.open(VERSION).then((cache) => {
+      const fresh = fetch(req).then((res) => { if (res.ok) cache.put(req, res.clone()); return res; });
+      const slow = new Promise((resolve) => setTimeout(resolve, WAIT_MS)).then(() => cache.match(req));
+      return Promise.race([fresh, slow.then((hit) => hit || fresh)])
+        .catch(() => cache.match(req).then((hit) => hit || fetch(req)));
+    }));
     return;
   }
 

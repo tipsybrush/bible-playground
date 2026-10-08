@@ -7,7 +7,7 @@
   --surface-2: #E6F1FB;
   --ink: #1A1B3A;
   --muted: #4A5378;
-  --discover-bg: #1A1B3A; --discover-ink: #1A1B3A;
+  --discover-bg: linear-gradient(160deg, #5F1E8C 0%, #B0246A 55%, #F2661C 100%); --discover-ink: #1A1B3A;
   --line: #C7D6EA;
   --edge: #1A1B3A;
   --hud-bg: #1A1B3A;
@@ -54,7 +54,7 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --sky-top: #0B1030; --sky-bottom: #2B2A6E; --surface: #1D2348; --surface-2: #283062; --ink: #F1F3FF;
-    --muted: #AEB6DA; --line: #39437A; --discover-bg: #262C66; --discover-ink: #FFF6DA; --edge: #04061A; --hud-bg: #04061A; --hud-ink: #FFFFFF;
+    --muted: #AEB6DA; --line: #39437A; --discover-bg: linear-gradient(160deg, #4A1670 0%, #931E59 55%, #CC5414 100%); --discover-ink: #FFF6DA; --edge: #04061A; --hud-bg: #04061A; --hud-ink: #FFFFFF;
     --coin: #FFC72C; --coin-ink: #2A1B00; --grass: #3E9A2A; --dirt: #6B4420; --cloud: #8F98C9;
     --c-quiz: #4C86FF; --c-ladder: #F08A1C; --c-blanks: #27A852; --c-puzzle: #EF5A5F; --c-gifts: #9B72FF; --c-riddles: #18B5AF; --c-charades: #E559AF; --c-word: #D69A1A; --c-snake: #8466F0; --c-timeline: #C9703F; --c-ark: #5E9E32; --c-map: #2E9AD0; --c-character: #B05CC6; --c-crossword: #E05252; --c-verse: #4A90D9; --c-trail: #A4B53A; --c-twin: #748FFC; --c-career: #0CA678; --c-wars: #F06A2A; --c-sling: #8C98AA; --c-truths: #E8668A;
     --good: #6BE08A; --good-bg: #173A22; --bad: #FF8A8A; --bad-bg: #431D21; --on-color: #FFFFFF;
@@ -63,7 +63,7 @@
 }
 :root[data-theme="dark"] {
   --sky-top: #0B1030; --sky-bottom: #2B2A6E; --surface: #1D2348; --surface-2: #283062; --ink: #F1F3FF;
-  --muted: #AEB6DA; --line: #39437A; --discover-bg: #262C66; --discover-ink: #FFF6DA; --edge: #04061A; --hud-bg: #04061A; --hud-ink: #FFFFFF;
+  --muted: #AEB6DA; --line: #39437A; --discover-bg: linear-gradient(160deg, #4A1670 0%, #931E59 55%, #CC5414 100%); --discover-ink: #FFF6DA; --edge: #04061A; --hud-bg: #04061A; --hud-ink: #FFFFFF;
   --coin: #FFC72C; --coin-ink: #2A1B00; --grass: #3E9A2A; --dirt: #6B4420; --cloud: #8F98C9;
   --c-quiz: #4C86FF; --c-ladder: #F08A1C; --c-blanks: #27A852; --c-puzzle: #EF5A5F; --c-gifts: #9B72FF; --c-riddles: #18B5AF; --c-charades: #E559AF; --c-word: #D69A1A; --c-snake: #8466F0; --c-timeline: #C9703F; --c-ark: #5E9E32; --c-map: #2E9AD0; --c-character: #B05CC6; --c-crossword: #E05252; --c-verse: #4A90D9; --c-trail: #A4B53A; --c-twin: #748FFC; --c-career: #0CA678; --c-wars: #F06A2A; --c-sling: #8C98AA; --c-truths: #E8668A;
   --good: #6BE08A; --good-bg: #173A22; --bad: #FF8A8A; --bad-bg: #431D21; --on-color: #FFFFFF;
@@ -152,7 +152,8 @@ a { color: inherit; }
 /* ---------- World tiles ---------- */
 .shelf { display: grid; grid-template-columns: 1fr; gap: 22px; }
 @media (min-width: 560px) { .shelf { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 900px) { .shelf { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* Four games per row on wide screens. Skip three columns so Discover (after game 8) never leaves a gap. */
+@media (min-width: 1024px) { .shelf { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; } }
 .card {
   display: flex; flex-direction: column;
   text-decoration: none;
@@ -189,7 +190,7 @@ a { color: inherit; }
   color: var(--on-color); background: var(--game);
   padding: 5px 8px; border: 2px solid var(--edge);
 }
-/* Discover Yourself: a navy room between games 6 and 7, with four mini covers like small game cards */
+/* Discover Yourself: a sunset-coloured room after game 8 (two rows on desktop), with four mini covers like small game cards */
 .discover {
   grid-column: 1 / -1; display: grid; gap: 14px; overflow: hidden;
   padding: 22px 18px 24px; background: var(--discover-bg); color: #FFFFFF;
@@ -198,7 +199,7 @@ a { color: inherit; }
 .dz-head { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; }
 .dz-kick { margin: 0; color: var(--coin); font: 700 .8rem var(--font-display); letter-spacing: .14em; }
 .dz h2 { font-family: var(--font-display); font-size: clamp(1.8rem, 5vw, 2.3rem); color: #FFFFFF; margin: 4px 0 6px; }
-.dz-head p:last-child { margin: 0; color: #C9CEEA; line-height: 1.45; }
+.dz-head p:last-child { margin: 0; color: #FFE3EE; line-height: 1.45; }
 .discover-chest { display: block; width: 120px; cursor: pointer; }
 .dz-chest { display: block; width: 100%; height: auto; transition: transform .2s steps(2); }
 .discover-chest:hover .dz-chest { transform: translateY(-4px) rotate(-3deg); }
