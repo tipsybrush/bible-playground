@@ -16,4 +16,6 @@ window.BP_CONFIG = {
   // Google Analytics 4 measurement ID (looks like G-XXXXXXXXXX). Game events are sent there once it is set.
   // Microsoft Clarity (in index.html) gets the same events either way.
   gaId: 'G-WGSZ8MZZDY',
+  // Microsoft Clarity project ID (heatmaps and session replays).
+  clarityId: 'ytw0jlwcxu',
 };

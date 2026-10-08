@@ -604,35 +604,9 @@
   }
 
   // ---------- Analytics ----------
-  // Game events go to Microsoft Clarity (always on) and to Google Analytics 4 once gaId is set in js/config.js.
-  // No names, nicknames or typed answers are ever sent: only which game, the score and the time.
-  let ga = null;
-  function analytics() {
-    const id = (window.BP_CONFIG || {}).gaId;
-    if (!/^G-[A-Z0-9]{4,}$/.test(id || '')) return;
-    window.dataLayer = window.dataLayer || [];
-    ga = function () { window.dataLayer.push(arguments); };
-    ga('js', new Date());
-    ga('config', id, { send_page_view: false, allow_google_signals: false, allow_ad_personalization_signals: false });
-    const s = document.createElement('script');
-    s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
-    document.head.append(s);
-  }
-  BP.track = function (name, params = {}) {
-    try {
-      if (typeof window.clarity === 'function') {
-        window.clarity('event', name);
-        if (params.game) window.clarity('set', 'game', params.game);
-      }
-      if (ga) ga('event', name, params);
-    } catch (e) { /* analytics must never break a game */ }
-  };
-  function pageView(id) {
-    if (!ga) return;
-    const ch = /^c\.([a-z]+)\./.exec(id || ''); // challenge links carry a nickname, so only keep the game
-    const tag = ch ? 'challenge-' + ch[1] : id;
-    ga('event', 'page_view', { page_title: document.title, page_location: location.origin + location.pathname + (tag ? '#' + tag : ''), page_path: '/' + (tag ? '#' + tag : '') });
-  }
+  // Consent and the analytics scripts live in js/analytics.js. These just pass events and page views on.
+  BP.track = function (name, params) { if (window.bpTrack) window.bpTrack(name, params); };
+  function pageView(id) { if (window.bpPageView) window.bpPageView(id); }
 
   function offline() {
     if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
@@ -640,7 +614,6 @@
   }
 
   BP.start = function () {
-    analytics();
     BP.renderHud();
     const invite = document.getElementById('invite');
     if (invite) invite.addEventListener('click', () => BP.share.invite(document.getElementById('invite-note')));

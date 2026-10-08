@@ -121,9 +121,8 @@ function head({ title, desc, url, jsonld }) {
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="${SITE}/og.png">
 <script type="application/ld+json">${JSON.stringify(jsonld)}</script>
-<script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","ytw0jlwcxu");</script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-WGSZ8MZZDY"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-WGSZ8MZZDY',{allow_google_signals:false,allow_ad_personalization_signals:false});</script>
+<script defer src="/js/config.js"></script>
+<script defer src="/js/analytics.js"></script>
 </head>
 <body class="guide-page">
 <header class="hud"><div class="hud-inner"><a class="hud-home" href="/">BIBLE<br>PLAYGROUND</a></div></header>
