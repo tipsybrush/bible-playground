@@ -15,5 +15,5 @@ window.BP_CONFIG = {
   coffeeUrl: '',
   // Google Analytics 4 measurement ID (looks like G-XXXXXXXXXX). Game events are sent there once it is set.
   // Microsoft Clarity (in index.html) gets the same events either way.
-  gaId: '',
+  gaId: 'G-WGSZ8MZZDY',
 };
