@@ -1693,3 +1693,4 @@ html:fullscreen, html:-webkit-full-screen { background: var(--sky-bottom); overf
 .guide-list a { font-size: 1.15rem; color: inherit; }
 .guide-list span { display: block; margin-top: 4px; color: var(--muted); }
 .guide .panel-title { margin-top: 26px; }
+.guide > .panel { margin-bottom: 18px; }

@@ -117,7 +117,7 @@
     prompt(first) {
       if (document.querySelector('.nick-modal')) return;
       const current = BP.nick.get();
-      const input = BP.h('input', { id: 'nick-modal-input', class: 'nick', type: 'text', maxlength: '16', autocomplete: 'nickname', value: first ? '' : current, placeholder: current });
+      const input = BP.h('input', { id: 'nick-modal-input', class: 'nick', 'data-clarity-mask': 'true', type: 'text', maxlength: '16', autocomplete: 'nickname', value: first ? '' : current, placeholder: current });
       const err = BP.h('p', { class: 'board-error', 'aria-live': 'polite' });
       const close = () => { BP.store.set('nick-asked', true); scrim.remove(); document.removeEventListener('keydown', onKey, true); };
       const save = (e) => {
@@ -398,6 +398,8 @@
     view.hidden = !(game || challenge);
     stage.replaceChildren();
     stage.classList.remove('stage-in'); void stage.offsetWidth; stage.classList.add('stage-in');
+    if (challenge) BP.track('challenge_open', { game: challenge.game });
+    else if (game) BP.track('game_open', { game: id });
     if (challenge) {
       document.title = 'Challenge · Bible Playground';
       stage.style.setProperty('--game', BP.games[challenge.game].color);
@@ -413,6 +415,7 @@
       document.title = 'Bible Playground';
       renderBadges();
     }
+    pageView(id);
     window.scrollTo(0, 0);
   }
 
@@ -560,7 +563,7 @@
   function coffee() {
     const url = (window.BP_CONFIG || {}).coffeeUrl;
     const el = document.getElementById('coffee-link');
-    if (el && /^https:\/\//.test(url || '')) { el.href = url; el.hidden = false; }
+    if (el && /^https:\/\//.test(url || '')) { el.href = url; el.hidden = false; el.addEventListener('click', () => BP.track('support_click')); }
   }
 
   // Easter egg: tap the "Playground" wordmark and its letters dance. Each tap plays the next move.
@@ -595,8 +598,40 @@
       const move = moves[next++ % moves.length];
       const anims = letters.map((el, i) => move(el, i));
       BP.sfx('egg'); BP.buzz && BP.buzz(15);
+      BP.track('easter_egg', { move: (next - 1) % moves.length });
       Promise.all(anims.map((a) => a.finished)).catch(() => {}).then(() => { busy = false; });
     });
+  }
+
+  // ---------- Analytics ----------
+  // Game events go to Microsoft Clarity (always on) and to Google Analytics 4 once gaId is set in js/config.js.
+  // No names, nicknames or typed answers are ever sent: only which game, the score and the time.
+  let ga = null;
+  function analytics() {
+    const id = (window.BP_CONFIG || {}).gaId;
+    if (!/^G-[A-Z0-9]{4,}$/.test(id || '')) return;
+    window.dataLayer = window.dataLayer || [];
+    ga = function () { window.dataLayer.push(arguments); };
+    ga('js', new Date());
+    ga('config', id, { send_page_view: false, allow_google_signals: false, allow_ad_personalization_signals: false });
+    const s = document.createElement('script');
+    s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+    document.head.append(s);
+  }
+  BP.track = function (name, params = {}) {
+    try {
+      if (typeof window.clarity === 'function') {
+        window.clarity('event', name);
+        if (params.game) window.clarity('set', 'game', params.game);
+      }
+      if (ga) ga('event', name, params);
+    } catch (e) { /* analytics must never break a game */ }
+  };
+  function pageView(id) {
+    if (!ga) return;
+    const ch = /^c\.([a-z]+)\./.exec(id || ''); // challenge links carry a nickname, so only keep the game
+    const tag = ch ? 'challenge-' + ch[1] : id;
+    ga('event', 'page_view', { page_title: document.title, page_location: location.origin + location.pathname + (tag ? '#' + tag : ''), page_path: '/' + (tag ? '#' + tag : '') });
   }
 
   function offline() {
@@ -605,6 +640,7 @@
   }
 
   BP.start = function () {
+    analytics();
     BP.renderHud();
     const invite = document.getElementById('invite');
     if (invite) invite.addEventListener('click', () => BP.share.invite(document.getElementById('invite-note')));

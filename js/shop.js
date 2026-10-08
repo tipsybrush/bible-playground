@@ -36,6 +36,7 @@
       store.set('coins-spent', spent() + ITEMS[id].price);
       const v = inv(); v[id] = (v[id] || 0) + 1; setInv(v);
       BP.renderHud(); BP.sfx('level'); BP.buzz([30, 30, 60]);
+      BP.track('shop_buy', { item: id });
       return true;
     },
     use(id) {

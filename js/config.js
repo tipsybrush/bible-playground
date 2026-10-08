@@ -13,4 +13,7 @@ window.BP_CONFIG = {
   supabaseKey: '',
   // Your donation link (a Paystack payment page, Selar, Flutterwave, Patreon…). The footer "Support this site" button shows once this is set.
   coffeeUrl: '',
+  // Google Analytics 4 measurement ID (looks like G-XXXXXXXXXX). Game events are sent there once it is set.
+  // Microsoft Clarity (in index.html) gets the same events either way.
+  gaId: '',
 };

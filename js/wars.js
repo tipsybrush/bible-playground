@@ -133,7 +133,7 @@
           addInput.placeholder = opts.custom.length >= MAX_CUSTOM ? 'That’s plenty of teams!' : 'e.g. Youth Band, Hospitality, Team Kofi';
         };
         // Teams that aren't on the list: type a name and add it.
-        const addInput = h('input', { class: 'wars-name', type: 'text', maxlength: '20', 'aria-label': 'Your own team name' });
+        const addInput = h('input', { class: 'wars-name', 'data-clarity-mask': 'true', type: 'text', maxlength: '20', 'aria-label': 'Your own team name' });
         const addBtn = h('button', { class: 'btn btn-small btn-green', type: 'button', onclick: addTeam }, '+ Add team');
         addInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addTeam(); } });
         function addTeam() {
@@ -160,7 +160,7 @@
         const rows = allTeams().map((d) => {
           const on = opts.picked.includes(d.id);
           const box = h('input', { type: 'checkbox', id: 'wars-pick-' + d.id, checked: on });
-          const input = h('input', { class: 'wars-name', type: 'text', maxlength: '20', value: opts.names[d.id] || '', placeholder: d.name, 'aria-label': `Name for ${d.name}` });
+          const input = h('input', { class: 'wars-name', 'data-clarity-mask': 'true', type: 'text', maxlength: '20', value: opts.names[d.id] || '', placeholder: d.name, 'aria-label': `Name for ${d.name}` });
           const badge = h('span', { class: 'wars-badge', 'aria-hidden': 'true' }, initials(nameOf(d)));
           const row = h('div', { class: 'wars-dept' + (on ? ' on' : ''), style: `--team:${d.color}` },
             h('label', { class: 'wars-check', for: 'wars-pick-' + d.id }, box, badge, h('span', { class: 'wars-sr' }, `Include ${d.name}`)), input,

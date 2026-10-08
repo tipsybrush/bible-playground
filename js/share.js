@@ -23,8 +23,9 @@
 
   // Share with the phone's share sheet when it exists, otherwise copy to the clipboard,
   // otherwise show the text so it can be copied by hand.
-  async function share({ title, text, url, canvas }, note, copyBox) {
+  async function share({ title, text, url, canvas, game, kind }, note, copyBox) {
     note.textContent = ''; copyBox.hidden = true;
+    const track = (method) => BP.track('share', { game: game || 'site', kind: kind || 'invite', method });
     if (navigator.share) {
       try {
         const data = { title, text, url };
@@ -34,6 +35,7 @@
           if (file && navigator.canShare({ files: [file] })) { data.files = [file]; data.text = text + ' ' + url; delete data.url; }
         }
         await navigator.share(data);
+        track('share_sheet');
         note.textContent = 'Shared! Now see if they can beat you.';
         return;
       } catch (e) {
@@ -42,10 +44,12 @@
     }
     try {
       await navigator.clipboard.writeText(text + ' ' + url);
+      track('copy');
       note.textContent = 'Copied! Paste it into a message to your friends.';
     } catch (e) {
       copyBox.textContent = text + ' ' + url;
       copyBox.hidden = false;
+      track('manual');
       note.textContent = 'Copy this message and send it to your friends:';
     }
   }
@@ -53,6 +57,7 @@
   async function savePicture(canvas, filename, note) {
     const blob = await new Promise((r) => canvas.toBlob(r, 'image/png'));
     if (!blob) return;
+    BP.track('save_picture', { game: filename.replace(/^bible-playground-|\.png$/g, '') });
     if (window.claude && typeof window.claude.use === 'function') {
       try {
         const downloads = await window.claude.use('downloads');
@@ -175,6 +180,8 @@
         ? h('span', { class: 'levelup' }, `LEVEL UP! YOU’RE NOW A LV ${reward.level.lv} ${reward.level.title.toUpperCase()}`)
         : h('span', null, `LV ${reward.level.lv} ${reward.level.title.toUpperCase()}`)));
     if (reward.levelUp) BP.confetti();
+    BP.track('game_finish', { game, score: Math.round(+o.points || 0), secs: Math.round(+o.secs || 0), detail: String(o.detail || '').slice(0, 40) });
+    if (reward.levelUp) BP.track('level_up', { level: reward.level.lv });
 
     const board = o.board !== false;
     const ch = BP.challenge;
@@ -219,10 +226,10 @@
       h('div', { class: 'share-main' },
         h('h3', null, board ? 'Brag about it!' : game === 'gifts' ? 'Share your gift' : 'Share it'),
         h('div', { class: 'btn-row' },
-          h('button', { class: 'btn btn-primary', type: 'button', onclick: () => share({ title: 'Bible Playground', text: shareText(), url: link(game), canvas }, note, copyBox) }, board ? 'Share my score' : 'Share my result'),
+          h('button', { class: 'btn btn-primary', type: 'button', onclick: () => share({ title: 'Bible Playground', text: shareText(), url: link(game), canvas, game, kind: 'score' }, note, copyBox) }, board ? 'Share my score' : 'Share my result'),
           board
-            ? h('button', { class: 'btn btn-green', type: 'button', onclick: () => share({ title: 'Bible Playground challenge', text: challengeText(), url: link(challengeHash(game, o.points, name())) }, note, copyBox) }, 'Challenge a friend')
-            : h('button', { class: 'btn btn-green', type: 'button', onclick: () => share({ title: 'Bible Playground', text: game === 'gifts' ? 'Take the Find Your Place quiz and see where you fit at church!' : `Play ${g.title} with me on Bible Playground!`, url: link(game) }, note, copyBox) }, 'Invite a friend'),
+            ? h('button', { class: 'btn btn-green', type: 'button', onclick: () => share({ title: 'Bible Playground challenge', text: challengeText(), url: link(challengeHash(game, o.points, name())), game, kind: 'challenge' }, note, copyBox) }, 'Challenge a friend')
+            : h('button', { class: 'btn btn-green', type: 'button', onclick: () => share({ title: 'Bible Playground', text: game === 'gifts' ? 'Take the Find Your Place quiz and see where you fit at church!' : `Play ${g.title} with me on Bible Playground!`, url: link(game), game, kind: 'invite' }, note, copyBox) }, 'Invite a friend'),
           h('button', { class: 'btn btn-small', type: 'button', onclick: () => savePicture(canvas, `bible-playground-${game}.png`, note) }, 'Save picture')),
         note, copyBox)));
 
