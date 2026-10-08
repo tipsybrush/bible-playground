@@ -7,7 +7,7 @@
   --surface-2: #E6F1FB;
   --ink: #1A1B3A;
   --muted: #4A5378;
-  --discover-bg: linear-gradient(#FFE8A3, #FFD15C); --discover-ink: #1A1B3A;
+  --discover-bg: #1A1B3A; --discover-ink: #1A1B3A;
   --line: #C7D6EA;
   --edge: #1A1B3A;
   --hud-bg: #1A1B3A;
@@ -54,7 +54,7 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --sky-top: #0B1030; --sky-bottom: #2B2A6E; --surface: #1D2348; --surface-2: #283062; --ink: #F1F3FF;
-    --muted: #AEB6DA; --line: #39437A; --discover-bg: #2A2410; --discover-ink: #FFF6DA; --edge: #04061A; --hud-bg: #04061A; --hud-ink: #FFFFFF;
+    --muted: #AEB6DA; --line: #39437A; --discover-bg: #262C66; --discover-ink: #FFF6DA; --edge: #04061A; --hud-bg: #04061A; --hud-ink: #FFFFFF;
     --coin: #FFC72C; --coin-ink: #2A1B00; --grass: #3E9A2A; --dirt: #6B4420; --cloud: #8F98C9;
     --c-quiz: #4C86FF; --c-ladder: #F08A1C; --c-blanks: #27A852; --c-puzzle: #EF5A5F; --c-gifts: #9B72FF; --c-riddles: #18B5AF; --c-charades: #E559AF; --c-word: #D69A1A; --c-snake: #8466F0; --c-timeline: #C9703F; --c-ark: #5E9E32; --c-map: #2E9AD0; --c-character: #B05CC6; --c-crossword: #E05252; --c-verse: #4A90D9; --c-trail: #A4B53A; --c-twin: #748FFC; --c-career: #0CA678; --c-wars: #F06A2A; --c-sling: #8C98AA; --c-truths: #E8668A;
     --good: #6BE08A; --good-bg: #173A22; --bad: #FF8A8A; --bad-bg: #431D21; --on-color: #FFFFFF;
@@ -63,7 +63,7 @@
 }
 :root[data-theme="dark"] {
   --sky-top: #0B1030; --sky-bottom: #2B2A6E; --surface: #1D2348; --surface-2: #283062; --ink: #F1F3FF;
-  --muted: #AEB6DA; --line: #39437A; --discover-bg: #2A2410; --discover-ink: #FFF6DA; --edge: #04061A; --hud-bg: #04061A; --hud-ink: #FFFFFF;
+  --muted: #AEB6DA; --line: #39437A; --discover-bg: #262C66; --discover-ink: #FFF6DA; --edge: #04061A; --hud-bg: #04061A; --hud-ink: #FFFFFF;
   --coin: #FFC72C; --coin-ink: #2A1B00; --grass: #3E9A2A; --dirt: #6B4420; --cloud: #8F98C9;
   --c-quiz: #4C86FF; --c-ladder: #F08A1C; --c-blanks: #27A852; --c-puzzle: #EF5A5F; --c-gifts: #9B72FF; --c-riddles: #18B5AF; --c-charades: #E559AF; --c-word: #D69A1A; --c-snake: #8466F0; --c-timeline: #C9703F; --c-ark: #5E9E32; --c-map: #2E9AD0; --c-character: #B05CC6; --c-crossword: #E05252; --c-verse: #4A90D9; --c-trail: #A4B53A; --c-twin: #748FFC; --c-career: #0CA678; --c-wars: #F06A2A; --c-sling: #8C98AA; --c-truths: #E8668A;
   --good: #6BE08A; --good-bg: #173A22; --bad: #FF8A8A; --bad-bg: #431D21; --on-color: #FFFFFF;
@@ -189,38 +189,42 @@ a { color: inherit; }
   color: var(--on-color); background: var(--game);
   padding: 5px 8px; border: 2px solid var(--edge);
 }
-/* Discover Yourself: a loot-chest banner that sits between games 6 and 7 */
+/* Discover Yourself: a navy room between games 6 and 7, with four mini covers like small game cards */
 .discover {
-  grid-column: 1 / -1; padding: 20px 16px 22px; background: var(--discover-bg); color: var(--discover-ink);
-  border: var(--block) solid var(--edge); box-shadow: 6px 6px 0 var(--edge);
-  display: grid; gap: 12px;
+  grid-column: 1 / -1; display: grid; gap: 14px; overflow: hidden;
+  padding: 22px 18px 24px; background: var(--discover-bg); color: #FFFFFF;
+  border: var(--block) solid var(--edge); box-shadow: 8px 8px 0 var(--edge);
 }
-.discover-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.discover-ribbon {
-  margin: 0; align-self: flex-start; padding: 5px 10px; background: #E8590C; color: #FFFFFF;
-  border: 3px solid var(--edge); box-shadow: 3px 3px 0 var(--edge);
-  font-size: .76rem; font-weight: 700; letter-spacing: .1em; line-height: 1.2;
+.dz-head { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; }
+.dz-kick { margin: 0; color: var(--coin); font: 700 .8rem var(--font-display); letter-spacing: .14em; }
+.dz h2 { font-family: var(--font-display); font-size: clamp(1.8rem, 5vw, 2.3rem); color: #FFFFFF; margin: 4px 0 6px; }
+.dz-head p:last-child { margin: 0; color: #C9CEEA; line-height: 1.45; }
+.discover-chest { display: block; width: 120px; cursor: pointer; }
+.dz-chest { display: block; width: 100%; height: auto; transition: transform .2s steps(2); }
+.discover-chest:hover .dz-chest { transform: translateY(-4px) rotate(-3deg); }
+.discover-chest.open .dz-chest { animation: dz-hop .5s steps(4); }
+@keyframes dz-hop { 0%, 100% { transform: none; } 40% { transform: translateY(-14px) rotate(4deg) scale(1.06); } 70% { transform: translateY(2px) scale(1.02, .96); } }
+.dz-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.dz-card {
+  display: flex; flex-direction: column; text-decoration: none; background: var(--surface); color: var(--ink);
+  border: 3px solid #0B0C1E; box-shadow: 4px 4px 0 rgba(0,0,0,.5); transition: transform .15s steps(2), box-shadow .15s steps(2);
 }
-.discover-chest { width: 64px; height: 54px; flex: none; cursor: pointer; }
-.discover-chest svg { width: 100%; height: 100%; display: block; }
-.chest-lid { transform-box: fill-box; transform-origin: 50% 100%; transition: transform .25s steps(3); }
-.discover-chest:hover .chest-lid { transform: rotate(-20deg); }
-.discover-chest.open .chest-lid { transform: rotate(-42deg); }
-.discover-title { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(1.9rem, 7vw, 2.4rem); line-height: 1.1; font-weight: 700; color: var(--discover-ink); }
-.discover-lede { margin: 0; font-size: 1.02rem; line-height: 1.45; max-width: 52ch; }
-.discover-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 6px; }
-.tool {
-  display: grid; grid-template-columns: 44px 1fr auto; column-gap: 12px; align-items: center;
-  padding: 12px 14px; text-decoration: none; color: var(--ink);
-  background: var(--surface); border: var(--block) solid var(--edge); box-shadow: 4px 4px 0 var(--edge);
-  transition: transform .15s steps(2), box-shadow .15s steps(2);
+.dz-card:hover, .dz-card:focus-visible { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 rgba(0,0,0,.5); }
+.dz-art {
+  position: relative; aspect-ratio: 4 / 3; display: grid; place-items: center; overflow: hidden;
+  background: var(--game); background: linear-gradient(color-mix(in srgb, var(--game) 70%, #FFFFFF), var(--game));
+  border-bottom: 3px solid var(--edge);
 }
-.tool:hover, .tool:focus-visible { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--edge); }
-.tool-icon { grid-column: 1; grid-row: 1 / span 2; width: 44px; height: 44px; color: var(--ink); border: 3px solid var(--edge); background: var(--surface-2, #FFF); }
-.tool-icon svg { width: 100%; height: 100%; display: block; }
-.tool-name { grid-column: 2; grid-row: 1; font-weight: 700; font-size: 1.02rem; line-height: 1.25; }
-.tool-text { grid-column: 2; grid-row: 2; font-size: .9rem; line-height: 1.35; color: var(--muted); }
-.tool-go { grid-column: 3; grid-row: 1 / span 2; font-weight: 700; font-size: .92rem; color: var(--game); }
+.dz-art svg:not(.dz-spark) { width: 46%; height: auto; margin-bottom: 14px; filter: drop-shadow(3px 3px 0 rgba(0,0,0,.25)); transition: transform .2s steps(2); }
+.dz-card:hover .dz-art svg:not(.dz-spark) { transform: translateY(-5px); }
+.dz-art::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 14px; background: linear-gradient(var(--grass) 0 6px, var(--dirt) 6px); border-top: 3px solid var(--edge); }
+.dz-spark { position: absolute; height: auto; pointer-events: none; }
+.dz-txt { padding: 10px 10px 12px; display: grid; gap: 2px; }
+.dz-txt b { font-size: .98rem; line-height: 1.2; }
+.dz-txt span { font-size: .82rem; color: var(--muted); line-height: 1.3; }
+@media (min-width: 900px) { .dz-grid { grid-template-columns: repeat(4, 1fr); } .discover-chest { width: 160px; } }
+@media (max-width: 420px) { .discover-chest { width: 92px; } .dz-kick { font-size: .72rem; letter-spacing: .1em; } }
+@media (prefers-reduced-motion: reduce) { .discover-chest.open .dz-chest { animation: none; } }
 
 /* Easter eggs: small surprises, shown and then gone */
 .egg-bit { position: fixed; top: 0; left: 0; width: 8px; height: 8px; border: 2px solid var(--edge); pointer-events: none; z-index: 90; }
