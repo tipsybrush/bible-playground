@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Bible Playground admin</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Chakra+Petch:wght@600;700&display=swap">
+<link rel="stylesheet" href="/css/style.css?v=33">
+<style>
+  body { background: var(--surface-2); }
+  .ad { max-width: 860px; margin: 0 auto; padding: 20px 16px 60px; display: grid; gap: 20px; }
+  .ad-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .ad-top h1 { font-size: 1.6rem; }
+  .ad-box { background: var(--surface); color: var(--ink); border: var(--block) solid var(--edge); box-shadow: 4px 4px 0 var(--edge); padding: 18px; display: grid; gap: 12px; }
+  .ad-box h2 { font-size: 1.25rem; }
+  .ad-box p.hint { margin: 0; color: var(--muted); font-size: .92rem; line-height: 1.4; }
+  .ad-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .ad input[type=text], .ad input[type=password], .ad select { font: inherit; padding: 10px 12px; border: 3px solid var(--edge); background: var(--surface); color: var(--ink); min-width: 0; }
+  .ad input[type=text], .ad input[type=password] { flex: 1 1 260px; }
+  .ad button { font: 700 .95rem var(--font-display); padding: 10px 14px; border: 3px solid var(--edge); background: var(--surface); color: var(--ink); cursor: pointer; box-shadow: 3px 3px 0 var(--edge); }
+  .ad button.go { background: var(--coin); color: var(--coin-ink); }
+  .ad button.bad { background: #E5484D; color: #FFF; }
+  .ad button:disabled { opacity: .5; cursor: default; }
+  .ad button.small { padding: 6px 9px; font-size: .82rem; box-shadow: 2px 2px 0 var(--edge); }
+  .ad-msg { margin: 0; font-weight: 700; min-height: 1.4em; }
+  .ad-msg.ok { color: #1E7B34; } .ad-msg.err { color: #C92A2A; }
+  .order { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .order li { display: grid; grid-template-columns: 26px 34px 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; border: 3px solid var(--edge); background: var(--surface); }
+  .order li.discover-row { background: linear-gradient(120deg, #5F1E8C, #B0246A 60%, #F2661C); color: #FFF; }
+  .order li.is-hidden { opacity: .55; }
+  .order li.dragging { outline: 3px dashed var(--coin); }
+  .grip { cursor: grab; font-size: 1.2rem; text-align: center; user-select: none; }
+  .num { font: 700 .85rem var(--font-display); }
+  .name { font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .swatch { width: 14px; height: 14px; border: 2px solid var(--edge); flex: none; }
+  .ctrls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+  .ctrls label { font-size: .85rem; display: flex; gap: 4px; align-items: center; }
+  .scores { width: 100%; border-collapse: collapse; font-size: .92rem; }
+  .scores th, .scores td { text-align: left; padding: 6px 8px; border-bottom: 2px solid var(--line); }
+  .scores td.act { white-space: nowrap; text-align: right; }
+  .links { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .links a { display: block; padding: 12px; border: 3px solid var(--edge); text-decoration: none; color: var(--ink); font-weight: 700; background: var(--surface); }
+  .links a small { display: block; font-weight: 400; color: var(--muted); }
+  .preview { margin: 0; }
+  @media (max-width: 560px) { .order li { grid-template-columns: 22px 1fr; } .order li .num { display: none; } .order li .ctrls { grid-column: 1 / -1; justify-content: flex-start; } }
+</style>
+</head>
+<body>
+<main class="ad">
+  <div class="ad-top">
+    <h1>Bible Playground admin</h1>
+    <div class="ad-row"><a href="/" target="_blank" rel="noopener">Open the live site</a><button type="button" id="logout" class="small" hidden>Sign out</button></div>
+  </div>
+
+  <section class="ad-box" id="login">
+    <h2>Sign in</h2>
+    <p class="hint">Enter the admin password. It is remembered only until you close this tab.</p>
+    <form class="ad-row" id="login-form">
+      <input type="password" id="pw" autocomplete="current-password" placeholder="Admin password" required>
+      <button class="go" type="submit">Sign in</button>
+    </form>
+    <p class="ad-msg" id="login-msg" role="status"></p>
+  </section>
+
+  <div id="panel" hidden style="display:grid;gap:20px">
+    <section class="ad-box">
+      <h2>Home page order</h2>
+      <p class="hint">Drag the rows, or use the arrows on a phone. "Discover Yourself" is a row too, so you can move it anywhere. Hidden games disappear from the home page but their links still work. "New" puts a red NEW tag on the cover. Press Save to put it live; players see it on their next visit.</p>
+      <ol class="order" id="order"></ol>
+      <div class="ad-row"><button class="go" type="button" id="save-order">Save order</button><button type="button" id="reset-order">Back to the original order</button></div>
+      <p class="ad-msg" id="order-msg" role="status"></p>
+    </section>
+
+    <section class="ad-box">
+      <h2>Announcement banner</h2>
+      <p class="hint">A yellow line shown above the games, for news like a new game, a challenge weekend or an event. Keep it short.</p>
+      <label class="ad-row"><input type="checkbox" id="banner-on"> Show the banner</label>
+      <div class="ad-row"><input type="text" id="banner-text" maxlength="160" placeholder="For example: New game! Try David's Sling and beat the top score this weekend."></div>
+      <div class="ad-row"><input type="text" id="banner-link" maxlength="200" placeholder="Optional link, for example #sling or https://..."></div>
+      <p class="site-banner preview" id="banner-preview" hidden></p>
+      <div class="ad-row"><button class="go" type="button" id="save-banner">Save banner</button></div>
+      <p class="ad-msg" id="banner-msg" role="status"></p>
+    </section>
+
+    <section class="ad-box">
+      <h2>Leaderboards</h2>
+      <p class="hint">Remove a single score, or remove a player from every leaderboard if their nickname is rude or they cheated. This can't be undone.</p>
+      <div class="ad-row"><select id="board-game" aria-label="Game"></select><button type="button" id="board-load">Show scores</button></div>
+      <div id="board-out"></div>
+      <p class="ad-msg" id="board-msg" role="status"></p>
+    </section>
+
+    <section class="ad-box">
+      <h2>Quick links</h2>
+      <div class="links">
+        <a href="https://analytics.google.com/" target="_blank" rel="noopener">Google Analytics<small>Visitors, games opened and finished</small></a>
+        <a href="https://clarity.microsoft.com/projects/view/ytw0jlwcxu/dashboard" target="_blank" rel="noopener">Microsoft Clarity<small>Recordings and heatmaps</small></a>
+        <a href="https://search.google.com/search-console" target="_blank" rel="noopener">Search Console<small>How the site shows on Google</small></a>
+        <a href="https://vercel.com/thetipsybrush/bible-playground" target="_blank" rel="noopener">Vercel<small>Deploys, logs and the admin password</small></a>
+        <a href="https://github.com/tipsybrush/bible-playground" target="_blank" rel="noopener">GitHub<small>The site's code</small></a>
+        <a href="/#leaderboards" target="_blank" rel="noopener">Live leaderboards<small>As players see them</small></a>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  let key = '';
+  try { key = sessionStorage.getItem('bp-admin') || ''; } catch (e) { /* private mode */ }
+  let games = [];        // [{ id, title, color }] in the original home page order, plus 'discover'
+  let settings = null;   // what is live now
+
+  function msg(el, text, ok) { el.textContent = text; el.className = 'ad-msg ' + (ok ? 'ok' : 'err'); }
+
+  async function api(body) {
+    const res = await fetch('/api/admin', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-key': key }, body: JSON.stringify(body) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw Object.assign(new Error(data.error || 'Something went wrong'), { status: res.status });
+    return data;
+  }
+
+  // The list of games comes straight from the live home page, so new games show up here by themselves.
+  async function loadGames() {
+    const html = await (await fetch('/index.html', { cache: 'no-store' })).text();
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const css = await (await fetch('/css/style.css?v=33', { cache: 'no-store' })).text();
+    const colour = (id) => { const m = css.match(new RegExp('--c-' + id + ':\\s*(#[0-9A-Fa-f]{3,8})')); return m ? m[1] : '#999'; };
+    games = [...doc.querySelectorAll('.shelf > *')].map((el) => {
+      if (el.classList.contains('discover')) return { id: 'discover', title: 'Discover Yourself (four tools)', color: '#B0246A' };
+      const id = (el.getAttribute('href') || '').slice(1);
+      const t = el.querySelector('.card-title');
+      return { id, title: t ? t.textContent.trim() : id, color: colour(id) };
+    }).filter((g) => g.id);
+  }
+
+  async function loadSettings() {
+    settings = await (await fetch('/api/settings', { cache: 'no-store' })).json();
+  }
+
+  // ---- Order ----
+  function currentOrder() {
+    const saved = (settings.order || []).filter((id) => games.some((g) => g.id === id));
+    return [...saved, ...games.map((g) => g.id).filter((id) => !saved.includes(id))];
+  }
+  function row(g, hidden, fresh) {
+    const li = document.createElement('li');
+    li.draggable = true; li.dataset.id = g.id;
+    if (g.id === 'discover') li.classList.add('discover-row');
+    li.classList.toggle('is-hidden', hidden);
+    li.innerHTML = '<span class="grip" aria-hidden="true">⋮⋮</span><span class="num"></span>' +
+      '<span class="name"><span class="swatch"></span><span></span></span>' +
+      '<span class="ctrls"><button type="button" class="small up" aria-label="Move up">▲</button><button type="button" class="small down" aria-label="Move down">▼</button>' +
+      '<label><input type="checkbox" class="hide"> Hide</label>' + (g.id === 'discover' ? '' : '<label><input type="checkbox" class="fresh"> New</label>') + '</span>';
+    li.querySelector('.swatch').style.background = g.color;
+    li.querySelector('.name span:last-child').textContent = g.title;
+    li.querySelector('.hide').checked = hidden;
+    if (li.querySelector('.fresh')) li.querySelector('.fresh').checked = fresh;
+    li.querySelector('.hide').addEventListener('change', (e) => { li.classList.toggle('is-hidden', e.target.checked); number(); });
+    li.querySelector('.up').addEventListener('click', () => { if (li.previousElementSibling) li.parentNode.insertBefore(li, li.previousElementSibling); number(); });
+    li.querySelector('.down').addEventListener('click', () => { if (li.nextElementSibling) li.parentNode.insertBefore(li.nextElementSibling, li); number(); });
+    li.addEventListener('dragstart', () => li.classList.add('dragging'));
+    li.addEventListener('dragend', () => { li.classList.remove('dragging'); number(); });
+    return li;
+  }
+  function number() {
+    let n = 0;
+    [...$('order').children].forEach((li) => {
+      const hidden = li.querySelector('.hide').checked;
+      li.querySelector('.num').textContent = li.dataset.id === 'discover' ? '' : (hidden ? '–' : '#' + (++n));
+    });
+  }
+  function drawOrder(ids, hidden, fresh) {
+    const list = $('order');
+    list.replaceChildren(...ids.map((id) => row(games.find((g) => g.id === id), hidden.includes(id), fresh.includes(id))));
+    number();
+  }
+  $('order').addEventListener('dragover', (e) => {
+    e.preventDefault();
+    const list = $('order');
+    const dragging = list.querySelector('.dragging');
+    if (!dragging) return;
+    const after = [...list.querySelectorAll('li:not(.dragging)')].find((li) => e.clientY < li.getBoundingClientRect().top + li.offsetHeight / 2);
+    list.insertBefore(dragging, after || null);
+  });
+
+  function readForm() {
+    const lis = [...$('order').children];
+    return {
+      order: lis.map((li) => li.dataset.id),
+      hidden: lis.filter((li) => li.querySelector('.hide').checked).map((li) => li.dataset.id),
+      fresh: lis.filter((li) => li.querySelector('.fresh') && li.querySelector('.fresh').checked).map((li) => li.dataset.id),
+      banner: { on: $('banner-on').checked, text: $('banner-text').value, link: $('banner-link').value },
+    };
+  }
+  async function save(button, out, what) {
+    button.disabled = true;
+    try {
+      const data = await api({ action: 'save-settings', settings: readForm() });
+      settings = data.settings;
+      msg(out, what + ' saved. It is live now; players see it next time they open or refresh the site.', true);
+    } catch (e) { msg(out, e.message, false); if (e.status === 401) signOut(); }
+    button.disabled = false;
+  }
+  $('save-order').addEventListener('click', (e) => save(e.target, $('order-msg'), 'Order'));
+  $('reset-order').addEventListener('click', () => { drawOrder(games.map((g) => g.id), [], []); msg($('order-msg'), 'Back to the original order. Press Save order to put it live.', true); });
+
+  // ---- Banner ----
+  function preview() {
+    const p = $('banner-preview');
+    p.textContent = $('banner-text').value.trim();
+    p.hidden = !($('banner-on').checked && p.textContent);
+  }
+  ['banner-on', 'banner-text'].forEach((id) => $(id).addEventListener('input', preview));
+  $('save-banner').addEventListener('click', (e) => save(e.target, $('banner-msg'), 'Banner'));
+
+  // ---- Leaderboards ----
+  let boards = {};
+  const fmtSecs = (s) => (typeof s === 'number' ? Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') : '');
+  async function loadBoards() {
+    try {
+      boards = (await api({ action: 'boards' })).boards || {};
+      drawBoard();
+    } catch (e) { msg($('board-msg'), e.message, false); if (e.status === 401) signOut(); }
+  }
+  function drawBoard() {
+    const game = $('board-game').value;
+    const rows = boards[game] || [];
+    const out = $('board-out');
+    if (!rows.length) { out.innerHTML = '<p class="hint">No scores yet for this game.</p>'; return; }
+    const table = document.createElement('table');
+    table.className = 'scores';
+    table.innerHTML = '<thead><tr><th>#</th><th>Name</th><th>Score</th><th>Time</th><th>Date</th><th></th></tr></thead>';
+    const body = document.createElement('tbody');
+    rows.forEach((r, i) => {
+      const tr = document.createElement('tr');
+      [String(i + 1), r.name, r.score.toLocaleString(), fmtSecs(r.secs), r.at ? new Date(r.at).toLocaleDateString() : ''].forEach((t) => { const td = document.createElement('td'); td.textContent = t; tr.appendChild(td); });
+      const act = document.createElement('td'); act.className = 'act';
+      const one = document.createElement('button'); one.type = 'button'; one.className = 'small'; one.textContent = 'Remove score';
+      const all = document.createElement('button'); all.type = 'button'; all.className = 'small bad'; all.textContent = 'Remove player';
+      one.addEventListener('click', async () => {
+        if (!confirm('Remove ' + r.name + "'s score of " + r.score + '?')) return;
+        try { const d = await api({ action: 'remove-score', game, at: r.at, name: r.name }); msg($('board-msg'), 'Removed ' + d.removed + ' score.', true); loadBoards(); }
+        catch (e) { msg($('board-msg'), e.message, false); }
+      });
+      all.addEventListener('click', async () => {
+        if (!confirm('Remove ' + r.name + ' from every leaderboard?')) return;
+        try { const d = await api({ action: 'remove-player', id: r.id || undefined, name: r.name }); msg($('board-msg'), 'Removed ' + d.removed + ' scores for ' + r.name + '.', true); loadBoards(); }
+        catch (e) { msg($('board-msg'), e.message, false); }
+      });
+      act.append(one, ' ', all); tr.appendChild(act); body.appendChild(tr);
+    });
+    table.appendChild(body);
+    out.replaceChildren(table);
+  }
+  $('board-load').addEventListener('click', loadBoards);
+  $('board-game').addEventListener('change', () => { if (Object.keys(boards).length) drawBoard(); });
+
+  // ---- Sign in ----
+  function signOut() {
+    key = '';
+    try { sessionStorage.removeItem('bp-admin'); } catch (e) { /* private mode */ }
+    $('panel').hidden = true; $('login').hidden = false; $('logout').hidden = true;
+  }
+  async function open() {
+    await Promise.all([loadGames(), loadSettings()]);
+    drawOrder(currentOrder(), settings.hidden || [], settings.fresh || []);
+    const b = settings.banner || {};
+    $('banner-on').checked = !!b.on; $('banner-text').value = b.text || ''; $('banner-link').value = b.link || '';
+    preview();
+    $('board-game').replaceChildren(...games.filter((g) => g.id !== 'discover').map((g) => new Option(g.title, g.id)));
+    $('login').hidden = true; $('panel').hidden = false; $('logout').hidden = false;
+  }
+  async function signIn(pw) {
+    key = pw;
+    try {
+      await api({ action: 'check' });
+      try { sessionStorage.setItem('bp-admin', pw); } catch (e) { /* private mode */ }
+      await open();
+    } catch (e) { signOut(); msg($('login-msg'), e.message, false); }
+  }
+  $('login-form').addEventListener('submit', (e) => { e.preventDefault(); signIn($('pw').value); });
+  $('logout').addEventListener('click', signOut);
+  if (key) signIn(key);
+})();
+</script>
+</body>
+</html>

@@ -152,7 +152,7 @@
     played.add(game); store.set('played', [...played]);
     const cards = [...document.querySelectorAll('#home .shelf a.card')]
       .map((el) => ({ el, id: (el.getAttribute('href') || '').slice(1) }))
-      .filter((c) => c.id && c.id !== game && !PARTY.includes(c.id));
+      .filter((c) => c.id && c.id !== game && !c.el.hidden && !PARTY.includes(c.id));
     if (cards.length < 2) return null;
     const shuffled = cards.sort(() => Math.random() - 0.5);
     const fresh = shuffled.filter((c) => !played.has(c.id));

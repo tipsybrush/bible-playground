@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /admin
 
 Sitemap: https://bible-playground.vercel.app/sitemap.xml

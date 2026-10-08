@@ -204,6 +204,7 @@ ${urls.map(([u, p]) => `  <url><loc>${SITE}${u}</loc><lastmod>${today}</lastmod>
 `);
 fs.writeFileSync(path.join(ROOT, 'robots.txt'), `User-agent: *
 Allow: /
+Disallow: /admin
 
 Sitemap: ${SITE}/sitemap.xml
 `);

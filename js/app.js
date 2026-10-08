@@ -603,6 +603,51 @@
     });
   }
 
+  // ---------- Site settings from the admin page ----------
+  // Game order, hidden games, "New" badges and the announcement banner are set on /admin and kept on
+  // the server. The last copy is saved on this device so the home page is arranged straight away,
+  // then refreshed from the server.
+  function applySettings(s) {
+    const shelf = document.querySelector('#home .shelf');
+    if (!s || !shelf) return;
+    const idOf = (el) => (el.classList.contains('discover') ? 'discover' : (el.getAttribute('href') || '').slice(1));
+    const items = [...shelf.children];
+    const byId = new Map(items.map((el) => [idOf(el), el]));
+    const order = (s.order || []).filter((id) => byId.has(id));
+    // Games added after the order was saved go at the end, in their usual order.
+    if (order.length) [...order.map((id) => byId.get(id)), ...items.filter((el) => !order.includes(idOf(el)))].forEach((el) => shelf.appendChild(el));
+    const hidden = new Set(s.hidden || []), fresh = new Set(s.fresh || []);
+    let n = 0;
+    [...shelf.children].forEach((el) => {
+      const id = idOf(el);
+      el.hidden = hidden.has(id);
+      if (!el.classList.contains('card')) return;
+      const tag = el.querySelector('.world-tag');
+      if (tag && !el.hidden) tag.textContent = 'WORLD ' + (++n);
+      const art = el.querySelector('.card-art');
+      let badge = el.querySelector('.new-tag');
+      if (fresh.has(id) && !badge && art) art.appendChild(BP.h('span', { class: 'new-tag' }, 'NEW'));
+      if (!fresh.has(id) && badge) badge.remove();
+    });
+    const bar = document.getElementById('site-banner');
+    const b = s.banner || {};
+    if (bar) {
+      bar.hidden = !(b.on && b.text);
+      bar.replaceChildren(b.link ? BP.h('a', { href: b.link }, b.text) : document.createTextNode(b.text || ''));
+    }
+  }
+  function siteSettings() {
+    try { applySettings(JSON.parse(localStorage.getItem('bp-settings') || 'null')); } catch (e) { /* no saved copy */ }
+    fetch('/api/settings', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((s) => {
+        if (!s) return;
+        try { localStorage.setItem('bp-settings', JSON.stringify(s)); } catch (e) { /* storage full or blocked */ }
+        applySettings(s);
+      })
+      .catch(() => {});
+  }
+
   // ---------- Easter eggs ----------
   // Small hidden finds around the site. Each one is a little surprise and a verse, never a prize.
   function eggs() {
@@ -742,7 +787,7 @@
     if (invite) invite.addEventListener('click', () => BP.share.invite(document.getElementById('invite-note')));
     window.addEventListener('hashchange', route);
     soundToggle(); watchFeedback(); keyboard(); edgeSwipe(); prefetchOnIntent(); offline();
-    coffee(); menu(); fullscreen(); wordmarkEgg(); eggs();
+    coffee(); menu(); fullscreen(); wordmarkEgg(); eggs(); siteSettings();
     document.querySelectorAll('[data-nick]').forEach((el) => { el.textContent = BP.nick.get(); });
     const nickBtn = document.getElementById('nick-change');
     if (nickBtn) nickBtn.addEventListener('click', () => BP.nick.prompt(false));

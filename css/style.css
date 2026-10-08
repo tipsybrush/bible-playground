@@ -227,6 +227,17 @@ a { color: inherit; }
 @media (max-width: 420px) { .discover-chest { width: 92px; } .dz-kick { font-size: .72rem; letter-spacing: .1em; } }
 @media (prefers-reduced-motion: reduce) { .discover-chest.open .dz-chest { animation: none; } }
 
+/* Set from /admin: an announcement line above the games, and "NEW" tags on chosen games */
+.site-banner {
+  margin: 0; padding: 12px 16px; background: var(--coin); color: var(--coin-ink); font-weight: 700; line-height: 1.4;
+  border: var(--block) solid var(--edge); box-shadow: 4px 4px 0 var(--edge);
+}
+.site-banner a { color: inherit; }
+.new-tag {
+  position: absolute; top: 10px; right: 10px; z-index: 2; padding: 3px 8px; background: #E5484D; color: #FFFFFF;
+  font: 700 .75rem var(--font-display); letter-spacing: .08em; border: 2px solid var(--edge);
+}
+
 /* Easter eggs: small surprises, shown and then gone */
 .egg-bit { position: fixed; top: 0; left: 0; width: 8px; height: 8px; border: 2px solid var(--edge); pointer-events: none; z-index: 90; }
 .egg-note {
