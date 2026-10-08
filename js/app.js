@@ -701,12 +701,15 @@
     // Tap the treasure chest on Discover Yourself: it opens and sparkles. Tap it five times for a verse.
     const chest = document.querySelector('.discover-chest');
     if (chest) {
-      let taps = 0, closeTimer = 0;
+      let taps = 0;
       chest.addEventListener('click', () => {
         taps++;
-        chest.classList.add('open');
-        clearTimeout(closeTimer);
-        closeTimer = setTimeout(() => chest.classList.remove('open'), 1200);
+        // A one-off hop, run from script so a quick second tap simply starts a fresh hop.
+        const art = chest.querySelector('svg');
+        if (art && !still) {
+          art.animate([{ transform: 'none' }, { transform: 'translateY(-14px) rotate(4deg) scale(1.06)', offset: 0.4 },
+            { transform: 'translateY(2px) scale(1.02, .96)', offset: 0.7 }, { transform: 'none' }], { duration: 500, easing: 'steps(4)' });
+        }
         const [x, y] = centreOf(chest);
         shower(14, 'point', x, y);
         BP.sfx('egg'); BP.buzz && BP.buzz(15);

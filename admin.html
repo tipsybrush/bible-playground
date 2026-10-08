@@ -7,7 +7,7 @@
 <title>Bible Playground admin</title>
 <link rel="icon" href="/favicon.ico">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Chakra+Petch:wght@600;700&display=swap">
-<link rel="stylesheet" href="/css/style.css?v=33">
+<link rel="stylesheet" href="/css/style.css?v=34">
 <style>
   body { background: var(--surface-2); }
   .ad { max-width: 860px; margin: 0 auto; padding: 20px 16px 60px; display: grid; gap: 20px; }
@@ -19,10 +19,19 @@
   .ad-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
   .ad input[type=text], .ad input[type=password], .ad select { font: inherit; padding: 10px 12px; border: 3px solid var(--edge); background: var(--surface); color: var(--ink); min-width: 0; }
   .ad input[type=text], .ad input[type=password] { flex: 1 1 260px; }
-  .ad button { font: 700 .95rem var(--font-display); padding: 10px 14px; border: 3px solid var(--edge); background: var(--surface); color: var(--ink); cursor: pointer; box-shadow: 3px 3px 0 var(--edge); }
+  .ad button { font: 700 .95rem var(--font-display); padding: 10px 14px; border: 3px solid var(--edge); background: var(--surface); color: var(--ink); cursor: pointer; box-shadow: 3px 3px 0 var(--edge);
+    transition: transform .15s ease-out, box-shadow .15s ease-out, background-color .15s ease-out; }
+  .ad button:not(:disabled):active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--edge); }
+  @media (hover: hover) {
+    .ad button:not(:disabled):hover { background: var(--surface-2); }
+    .ad button.go:not(:disabled):hover { background: var(--coin); filter: brightness(1.06); }
+    .ad button.bad:not(:disabled):hover { background: #C92A2A; }
+    .links a:hover { background: var(--coin); color: var(--coin-ink); }
+  }
+  .ad :is(button, a, input, select):focus-visible { outline: 3px solid var(--coin); outline-offset: 2px; }
   .ad button.go { background: var(--coin); color: var(--coin-ink); }
   .ad button.bad { background: #E5484D; color: #FFF; }
-  .ad button:disabled { opacity: .5; cursor: default; }
+  .ad button:disabled { opacity: .5; cursor: default; box-shadow: none; }
   .ad button.small { padding: 6px 9px; font-size: .82rem; box-shadow: 2px 2px 0 var(--edge); }
   .ad-msg { margin: 0; font-weight: 700; min-height: 1.4em; }
   .ad-msg.ok { color: #1E7B34; } .ad-msg.err { color: #C92A2A; }
@@ -30,7 +39,8 @@
   .order li { display: grid; grid-template-columns: 26px 34px 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; border: 3px solid var(--edge); background: var(--surface); }
   .order li.discover-row { background: linear-gradient(120deg, #5F1E8C, #B0246A 60%, #F2661C); color: #FFF; }
   .order li.is-hidden { opacity: .55; }
-  .order li.dragging { outline: 3px dashed var(--coin); }
+  .order li.dragging { outline: 3px dashed var(--coin); opacity: .85; }
+  .grip:active { cursor: grabbing; }
   .grip { cursor: grab; font-size: 1.2rem; text-align: center; user-select: none; }
   .num { font: 700 .85rem var(--font-display); }
   .name { font-weight: 700; display: flex; align-items: center; gap: 8px; }
@@ -40,8 +50,10 @@
   .scores { width: 100%; border-collapse: collapse; font-size: .92rem; }
   .scores th, .scores td { text-align: left; padding: 6px 8px; border-bottom: 2px solid var(--line); }
   .scores td.act { white-space: nowrap; text-align: right; }
+  .scores td:nth-child(3), .scores td:nth-child(4) { font-variant-numeric: tabular-nums; }
+  #board-out { overflow-x: auto; overscroll-behavior-x: contain; }
   .links { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
-  .links a { display: block; padding: 12px; border: 3px solid var(--edge); text-decoration: none; color: var(--ink); font-weight: 700; background: var(--surface); }
+  .links a { display: block; padding: 12px; border: 3px solid var(--edge); text-decoration: none; color: var(--ink); font-weight: 700; background: var(--surface); transition: background-color .15s ease-out, color .15s ease-out; }
   .links a small { display: block; font-weight: 400; color: var(--muted); }
   .preview { margin: 0; }
   @media (max-width: 560px) { .order li { grid-template-columns: 22px 1fr; } .order li .num { display: none; } .order li .ctrls { grid-column: 1 / -1; justify-content: flex-start; } }
@@ -127,7 +139,7 @@
   async function loadGames() {
     const html = await (await fetch('/index.html', { cache: 'no-store' })).text();
     const doc = new DOMParser().parseFromString(html, 'text/html');
-    const css = await (await fetch('/css/style.css?v=33', { cache: 'no-store' })).text();
+    const css = await (await fetch('/css/style.css?v=34', { cache: 'no-store' })).text();
     const colour = (id) => { const m = css.match(new RegExp('--c-' + id + ':\\s*(#[0-9A-Fa-f]{3,8})')); return m ? m[1] : '#999'; };
     games = [...doc.querySelectorAll('.shelf > *')].map((el) => {
       if (el.classList.contains('discover')) return { id: 'discover', title: 'Discover Yourself (four tools)', color: '#B0246A' };

@@ -2,7 +2,7 @@
 // Pages, scripts, styles and data are fetched fresh whenever the network answers within a few
 // seconds, so updates show up on the next visit; the saved copy is only used when it doesn't.
 // Icons and fonts are served from the saved copy straight away. Bump VERSION to clear old copies.
-const VERSION = 'bp-v33';
+const VERSION = 'bp-v34';
 const WAIT_MS = 3500;
 const CORE = ['./', 'index.html', 'css/style.css', 'js/config.js', 'js/app.js', 'js/leaderboard.js', 'js/player.js', 'js/share.js'];
 
