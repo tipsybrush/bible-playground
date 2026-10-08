@@ -603,6 +603,119 @@
     });
   }
 
+  // ---------- Easter eggs ----------
+  // Small hidden finds around the site. Each one is a little surprise and a verse, never a prize.
+  function eggs() {
+    const still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const rand = (a, b) => a + Math.random() * (b - a);
+    const COLORS = ['#FFC72C', '#E8590C', '#1864AB', '#2B8A3E', '#7048E8', '#E03131'];
+    // Pixel squares either rain down the screen (from: 'top') or burst out of a point (from: 'point').
+    function shower(n, from, x, y) {
+      if (still) return;
+      for (let i = 0; i < n; i++) {
+        const bit = document.createElement('span');
+        bit.className = 'egg-bit';
+        bit.style.background = COLORS[i % COLORS.length];
+        const size = rand(6, 12);
+        bit.style.width = bit.style.height = size + 'px';
+        document.body.appendChild(bit);
+        let keys, opts;
+        if (from === 'top') {
+          bit.style.left = rand(0, 100) + 'vw';
+          bit.style.top = '-20px';
+          keys = [{ transform: 'translateY(0) rotate(0deg)' }, { transform: `translateY(110vh) rotate(${rand(-360, 360)}deg)` }];
+          opts = { duration: rand(1400, 2600), delay: rand(0, 700), easing: 'cubic-bezier(.4,0,.8,1)' };
+        } else {
+          bit.style.left = x + 'px';
+          bit.style.top = y + 'px';
+          const dx = rand(-140, 140), dy = rand(-160, 60);
+          keys = [{ transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+            { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(.4) rotate(${rand(-200, 200)}deg)`, opacity: 0 }];
+          opts = { duration: rand(700, 1100), easing: 'cubic-bezier(.2,.7,.4,1)' };
+        }
+        const anim = bit.animate(keys, { fill: 'forwards', ...opts });
+        anim.finished.then(() => bit.remove(), () => bit.remove());
+      }
+    }
+    // A short note that fades out by itself.
+    function note(text) {
+      const old = document.querySelector('.egg-note');
+      if (old) old.remove();
+      const el = document.createElement('p');
+      el.className = 'egg-note';
+      el.setAttribute('role', 'status');
+      el.textContent = text;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 6000);
+    }
+    function centreOf(el) {
+      const r = el.getBoundingClientRect();
+      return [r.left + r.width / 2, r.top + r.height / 2];
+    }
+
+    // Tap the treasure chest on Discover Yourself: it opens and sparkles. Tap it five times for a verse.
+    const chest = document.querySelector('.discover-chest');
+    if (chest) {
+      let taps = 0, closeTimer = 0;
+      chest.addEventListener('click', () => {
+        taps++;
+        chest.classList.add('open');
+        clearTimeout(closeTimer);
+        closeTimer = setTimeout(() => chest.classList.remove('open'), 1200);
+        const [x, y] = centreOf(chest);
+        shower(14, 'point', x, y);
+        BP.sfx('egg'); BP.buzz && BP.buzz(15);
+        if (taps === 5) {
+          note('Psalm 119:105: Your word is a lamp unto my feet, and a light unto my path.');
+          BP.track('easter_egg', { name: 'chest' });
+        }
+      });
+    }
+
+    // Tap the red heart in the footer five times.
+    const heart = document.querySelector('.foot-heart');
+    if (heart) {
+      let hearts = 0;
+      heart.style.cursor = 'pointer';
+      heart.addEventListener('click', () => {
+        hearts++;
+        const [x, y] = centreOf(heart);
+        shower(10, 'point', x, y);
+        BP.sfx('egg');
+        if (hearts === 5) {
+          note('Psalm 100:5: For the LORD is good; his mercy is everlasting; and his truth endureth to all generations.');
+          BP.track('easter_egg', { name: 'heart' });
+        }
+      });
+    }
+
+    // Type "amen" anywhere on the page (not in a text box) for a burst of pixels.
+    let typed = '';
+    // The classic up, up, down, down, left, right, left, right, B, A. Coins rain down.
+    const CODE = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
+    let seq = [];
+    document.addEventListener('keydown', (e) => {
+      if (/input|textarea|select/i.test(e.target.tagName) || e.target.isContentEditable) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const k = e.key.toLowerCase();
+      if (e.key.length === 1) typed = (typed + k).slice(-4);
+      if (typed === 'amen') {
+        typed = '';
+        shower(40, 'point', innerWidth / 2, innerHeight / 3);
+        BP.sfx('egg');
+        BP.track('easter_egg', { name: 'amen' });
+      }
+      seq = [...seq, k].slice(-CODE.length);
+      if (seq.join() === CODE.join()) {
+        seq = [];
+        shower(70, 'top');
+        BP.sfx('egg');
+        note('Matthew 6:20: But lay up for yourselves treasures in heaven.');
+        BP.track('easter_egg', { name: 'konami' });
+      }
+    });
+  }
+
   // ---------- Analytics ----------
   // Consent and the analytics scripts live in js/analytics.js. These just pass events and page views on.
   BP.track = function (name, params) { if (window.bpTrack) window.bpTrack(name, params); };
@@ -619,7 +732,7 @@
     if (invite) invite.addEventListener('click', () => BP.share.invite(document.getElementById('invite-note')));
     window.addEventListener('hashchange', route);
     soundToggle(); watchFeedback(); keyboard(); edgeSwipe(); prefetchOnIntent(); offline();
-    coffee(); menu(); fullscreen(); wordmarkEgg();
+    coffee(); menu(); fullscreen(); wordmarkEgg(); eggs();
     document.querySelectorAll('[data-nick]').forEach((el) => { el.textContent = BP.nick.get(); });
     const nickBtn = document.getElementById('nick-change');
     if (nickBtn) nickBtn.addEventListener('click', () => BP.nick.prompt(false));

@@ -1,7 +1,7 @@
 // Service worker: keeps a copy of the site so it opens instantly and works offline.
 // Pages are fetched fresh when there is a connection; scripts, data and styles are served from the
 // cache straight away and quietly refreshed in the background. Bump VERSION to clear old copies.
-const VERSION = 'bp-v28';
+const VERSION = 'bp-v29';
 const CORE = ['./', 'index.html', 'css/style.css', 'js/config.js', 'js/app.js', 'js/leaderboard.js', 'js/player.js', 'js/share.js'];
 
 self.addEventListener('install', (e) => {
