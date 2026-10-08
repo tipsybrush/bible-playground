@@ -37,7 +37,7 @@ const GAMES = [
   { id: 'snake', slug: 'books-of-the-bible-game', name: 'Books of the Bible Snake', title: 'Books of the Bible Snake: Learn the Books of the Bible in Order',
     desc: 'Learn the books of the Bible in order with a snake game. Eat Genesis to Malachi or Matthew to Revelation in the right order, fast.',
     intro: 'A snake game that teaches the 66 books of the Bible in order. Glide through the Old Testament or New Testament and watch out for decoy books.',
-    steps: ['The next book you need is shown above the board.', 'Steer with the arrow keys, by swiping, or with the buttons underneath.', 'Avoid decoys, walls and your own tail, and be quick for a speed bonus.'] },
+    steps: ['The next book you need is shown above the board.', 'Steer with the arrow keys, by swiping, or with the buttons underneath.', 'Avoid decoys and your own tail. Walls wrap around, so you come out the other side, and be quick for a speed bonus.'] },
   { id: 'timeline', slug: 'bible-timeline-game', name: 'Timeline Rush', title: 'Timeline Rush: Put Bible Events in Order',
     desc: 'A Bible timeline game: put Bible events in the order they happened before the clock runs out. From Creation to the early church.',
     intro: 'How well do you know the order of events in the Bible? Put Bible events in order, from Creation to the early church, before time runs out.',

@@ -1,5 +1,5 @@
 // Books of the Bible Snake: a modern take on snake. Eat the books in order. Each right book makes
-// the snake longer and faster. A wrong book, a wall or your own tail costs a life.
+// the snake longer and faster. A wrong book or your own tail costs a life. The walls wrap around.
 (function () {
   const { h, store } = BP;
   const COLS = 10, ROWS = 10, LIVES = 3, DECOYS = 2;
@@ -57,7 +57,7 @@
             h('li', null, 'The next book you need is shown above the board. Books glow in the colour of their part of the Bible.'),
             h('li', null, 'Steer with the arrow keys, by swiping on the board, or with the buttons underneath.'),
             h('li', null, 'Some books on the board are decoys. Eat the wrong one and you lose a life.'),
-            h('li', null, 'Hitting a wall or your own tail costs a life too. You have three.'),
+            h('li', null, 'The walls wrap around: go off one edge and you come out the other side. Hitting your own tail costs a life. You have three.'),
             h('li', null, 'Be quick: beat 5 seconds a book for a speed bonus.')),
           h('div', { class: 'size-row' }, h('span', { class: 'ref' }, 'Books:'), btns),
           h('div', { class: 'btn-row' }, h('button', { class: 'btn btn-primary', onclick: play }, 'Start')));
@@ -181,10 +181,11 @@
 
         function step() {
           if (queued.length) dir = queued.shift();
-          const head = [snake[0][0] + dir[0], snake[0][1] + dir[1]];
-          const hitWall = head[0] < 0 || head[1] < 0 || head[0] >= COLS || head[1] >= ROWS;
+          // Walls wrap: going off one edge brings the snake out of the opposite edge.
+          const wrap = (v, n) => ((v % n) + n) % n;
+          const head = [wrap(snake[0][0] + dir[0], COLS), wrap(snake[0][1] + dir[1], ROWS)];
           const hitSelf = snake.slice(0, -1).some(([x, y]) => x === head[0] && y === head[1]);
-          if (hitWall || hitSelf) return loseLife(hitWall ? 'Ouch, the wall!' : 'You ran into your own tail!');
+          if (hitSelf) return loseLife('You ran into your own tail!');
           prev = snake.map((p) => p.slice());
           snake.unshift(head);
           const it = items.find((t) => t.at[0] === head[0] && t.at[1] === head[1]);
@@ -289,9 +290,12 @@
           // Snake: a smooth glowing tube, sliding between grid cells.
           const t = paused || over ? 1 : Math.min(1, acc / tickMs);
           const ease = t * t * (3 - 2 * t);
+          // A segment that just came through a wall jumps to the far side, so it is drawn without sliding.
+          const far = (a, b) => Math.abs(a[0] - b[0]) > 1 || Math.abs(a[1] - b[1]) > 1;
           const pts = snake.map((p, n) => {
             const q = prev[n] || p;
-            return [(q[0] + (p[0] - q[0]) * ease + 0.5) * cell, (q[1] + (p[1] - q[1]) * ease + 0.5) * cell];
+            const e = far(p, q) ? 1 : ease;
+            return [(q[0] + (p[0] - q[0]) * e + 0.5) * cell, (q[1] + (p[1] - q[1]) * e + 0.5) * cell];
           });
           ctx.save();
           ctx.lineCap = 'round'; ctx.lineJoin = 'round';
@@ -300,6 +304,7 @@
             const f = n / Math.max(1, pts.length - 1);
             ctx.strokeStyle = mix('#B197FC', '#5F3DC4', f);
             ctx.lineWidth = cell * (0.62 - 0.2 * f);
+            if (far(snake[n], snake[n - 1])) continue; // no line across the board where the snake wrapped
             ctx.beginPath(); ctx.moveTo(pts[n][0], pts[n][1]); ctx.lineTo(pts[n - 1][0], pts[n - 1][1]); ctx.stroke();
           }
           // Head
