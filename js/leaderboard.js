@@ -213,6 +213,9 @@
         let rows, loaded = true;
         try { rows = await backend.top(game, true); } catch (e) { rows = []; loaded = false; }
 
+        // A new player is asked for a nickname once, here, when they first have a score to save
+        // (not on arrival, which got in the way of starting a game).
+        if (score > 0 && !BP.store.get('nick-asked', false)) await BP.nick.prompt(true);
         const name = BP.nick.get();
         const id = await myId;
         score = Math.round(score);

@@ -113,13 +113,16 @@
       document.dispatchEvent(new CustomEvent('bp:nick', { detail: name }));
       return true;
     },
-    // The nickname pop-up. first: shown on a first visit, where "Skip" keeps the random name.
+    // The nickname pop-up. first: shown the first time a player finishes a scored game, where "Skip"
+    // keeps the random name. Resolves when the pop-up closes, so the score can be saved under the name.
     prompt(first) {
-      if (document.querySelector('.nick-modal')) return;
+      if (document.querySelector('.nick-modal')) return Promise.resolve();
+      let done;
+      const closed = new Promise((resolve) => { done = resolve; });
       const current = BP.nick.get();
       const input = BP.h('input', { id: 'nick-modal-input', class: 'nick', 'data-clarity-mask': 'true', type: 'text', maxlength: '16', autocomplete: 'nickname', value: first ? '' : current, placeholder: current });
       const err = BP.h('p', { class: 'board-error', 'aria-live': 'polite' });
-      const close = () => { BP.store.set('nick-asked', true); scrim.remove(); document.removeEventListener('keydown', onKey, true); };
+      const close = () => { BP.store.set('nick-asked', true); scrim.remove(); document.removeEventListener('keydown', onKey, true); done(); };
       const save = (e) => {
         e.preventDefault();
         const typed = input.value.trim();
@@ -129,8 +132,8 @@
       };
       const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); } };
       const box = BP.h('form', { class: 'nick-modal panel', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'nick-modal-title', onsubmit: save },
-        BP.h('h2', { id: 'nick-modal-title', class: 'panel-title' }, first ? 'Welcome! What should we call you?' : 'Change your nickname'),
-        BP.h('p', null, 'Your nickname goes on the leaderboards when you get a top score. Use a nickname, not your full name.'),
+        BP.h('h2', { id: 'nick-modal-title', class: 'panel-title' }, first ? 'Nice game! What name should go on the leaderboard?' : 'Change your nickname'),
+        BP.h('p', null, first ? 'Your score is about to be saved. Use a nickname, not your full name. You can change it any time.' : 'Your nickname goes on the leaderboards when you get a top score. Use a nickname, not your full name.'),
         BP.h('label', { for: 'nick-modal-input', class: 'nick-label' }, 'Nickname'),
         input, err,
         BP.h('div', { class: 'btn-row' },
@@ -140,6 +143,7 @@
       document.body.append(scrim);
       document.addEventListener('keydown', onKey, true);
       setTimeout(() => input.focus(), 50);
+      return closed;
     },
   };
 
@@ -322,8 +326,13 @@
   BP.scored = ['quiz', 'ladder', 'blanks', 'riddles', 'word', 'snake', 'timeline', 'ark', 'map', 'crossword', 'verse', 'trail', 'sling', 'truths'];
   BP.manifest.leaderboards = [...new Set(BP.scored.flatMap((g) => BP.manifest[g]))];
 
+  // Game files carry the same version as app.js (?v=N in index.html), so the service worker can open
+  // them straight from its saved copy, and a new release still fetches fresh files.
+  const ASSET_V = (() => { try { return new URL(document.currentScript.src).searchParams.get('v') || ''; } catch (e) { return ''; } })();
+  const versioned = (src) => (ASSET_V ? `${src}?v=${ASSET_V}` : src);
   const loading = {};
   function loadScript(src) {
+    src = versioned(src);
     if (!loading[src]) {
       loading[src] = new Promise((resolve, reject) => {
         const el = document.createElement('script');
@@ -795,7 +804,5 @@
     const nickBtn = document.getElementById('nick-change');
     if (nickBtn) nickBtn.addEventListener('click', () => BP.nick.prompt(false));
     route().then(warmUp);
-    // First visit: offer to pick a nickname (skipping keeps a random one).
-    if (!BP.store.get('nick-asked', false)) setTimeout(() => { if (!BP.store.get('nick-asked', false)) BP.nick.prompt(true); }, 900);
   };
 })();

@@ -1,9 +1,10 @@
-// Service worker: keeps a copy of the site so it works offline and on bad connections.
-// Pages, scripts, styles and data are fetched fresh whenever the network answers within a few
-// seconds, so updates show up on the next visit; the saved copy is only used when it doesn't.
+// Service worker: keeps a copy of the site so it opens fast and works offline and on bad connections.
+// Pages are always fetched fresh. Scripts and styles with a version in their address (?v=N) never
+// change, so they open straight from the saved copy (a new release uses a new N). Anything else is
+// fetched fresh if the network answers quickly, otherwise the saved copy is used.
 // Icons and fonts are served from the saved copy straight away. Bump VERSION to clear old copies.
-const VERSION = 'bp-v34';
-const WAIT_MS = 3500;
+const VERSION = 'bp-v35';
+const WAIT_MS = 1500;
 const CORE = ['./', 'index.html', 'css/style.css', 'js/config.js', 'js/app.js', 'js/leaderboard.js', 'js/player.js', 'js/share.js'];
 
 self.addEventListener('install', (e) => {
@@ -31,7 +32,16 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Code and content: network first, falling back to the saved copy if the network is slow or down.
+  // Versioned files: the saved copy if there is one, otherwise download and keep it.
+  if (!fonts && url.searchParams.has('v')) {
+    e.respondWith(caches.open(VERSION).then((cache) => cache.match(req).then((hit) => hit || fetch(req).then((res) => {
+      if (res.ok) cache.put(req, res.clone());
+      return res;
+    }))));
+    return;
+  }
+
+  // Other code and content: network first, falling back to the saved copy if the network is slow or down.
   if (!fonts && /\.(css|js|json)$/.test(url.pathname)) {
     e.respondWith(caches.open(VERSION).then((cache) => {
       const fresh = fetch(req).then((res) => { if (res.ok) cache.put(req, res.clone()); return res; });

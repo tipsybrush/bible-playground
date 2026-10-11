@@ -7,7 +7,7 @@
 <title>Bible Playground admin</title>
 <link rel="icon" href="/favicon.ico">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Chakra+Petch:wght@600;700&display=swap">
-<link rel="stylesheet" href="/css/style.css?v=34">
+<link rel="stylesheet" href="/css/style.css?v=35">
 <style>
   body { background: var(--surface-2); }
   .ad { max-width: 860px; margin: 0 auto; padding: 20px 16px 60px; display: grid; gap: 20px; }
@@ -139,7 +139,7 @@
   async function loadGames() {
     const html = await (await fetch('/index.html', { cache: 'no-store' })).text();
     const doc = new DOMParser().parseFromString(html, 'text/html');
-    const css = await (await fetch('/css/style.css?v=34', { cache: 'no-store' })).text();
+    const css = await (await fetch('/css/style.css?v=35', { cache: 'no-store' })).text();
     const colour = (id) => { const m = css.match(new RegExp('--c-' + id + ':\\s*(#[0-9A-Fa-f]{3,8})')); return m ? m[1] : '#999'; };
     games = [...doc.querySelectorAll('.shelf > *')].map((el) => {
       if (el.classList.contains('discover')) return { id: 'discover', title: 'Discover Yourself (four tools)', color: '#B0246A' };
